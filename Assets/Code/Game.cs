@@ -152,8 +152,8 @@ public class Game : MonoBehaviour
 			}
 			else
 			{
-				spawner.spawnType = SpawnType.ACTOR_AI;
-				go = spawner.Spawn();
+				//spawner.spawnType = SpawnType.ACTOR_AI;
+				//go = spawner.Spawn();
 			}
 		}
 	}

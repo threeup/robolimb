@@ -16,8 +16,9 @@ public class Actor : MonoBehaviour
 	public ActorTeam team = ActorTeam.NONE;
 	public ThrowPhase throwPhase = ThrowPhase.NONE;
 
-	public float headDistance = 0f;
 	public ActorBody body;
+	public Aimer aimer;
+
 	public BasicTimer throwTimer = new BasicTimer(0);
 	public BasicTimer superTimer = new BasicTimer(0);
 	public bool aiThrow;
@@ -48,6 +49,18 @@ public class Actor : MonoBehaviour
 		if( throwTimer.Tick(deltaTime) )
 		{
 			AdvanceThrow();
+		}
+		if( aimer != null )
+		{
+			if( throwPhase == ThrowPhase.CHARGE )
+			{
+				aimer.SetEnabled(true);
+				aimer.SetAimAmount(1f-throwTimer.Percent);
+			}
+			else
+			{
+				aimer.SetEnabled(false);
+			}
 		}
 	}
 

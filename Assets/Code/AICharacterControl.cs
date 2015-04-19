@@ -20,6 +20,7 @@ namespace UnityStandardAssets.Characters.ThirdPerson
         public BasicTimer runTimer = new BasicTimer(8f, true);
         public AnimationCurve runCurve;
 
+        private float aiDesiredSpeed = 1f;
         // Use this for initialization
         private void Start()
         {
@@ -56,7 +57,7 @@ namespace UnityStandardAssets.Characters.ThirdPerson
             float actorSpeed = actor.body.GetSpeed();
             float runSpeed = Mathf.Clamp(throttle, 0f, actorSpeed);
 
-            agent.speed = runSpeed*1f;
+            agent.speed = runSpeed*aiDesiredSpeed*1f;
             agent.angularSpeed = (1f-throttle)*120f;
 
 
@@ -72,17 +73,20 @@ namespace UnityStandardAssets.Characters.ThirdPerson
                 float distSq = (this.transform.position - target.position).sqrMagnitude;
                 if( distSq < 3f*3f )
                 {
-                    agent.SetDestination(this.transform.position);
+                    aiDesiredSpeed = 0.1f;
+                    agent.SetDestination(target.position);
                     actor.AIThrow(true);
                 }
                 else
                 {
+                    aiDesiredSpeed = 1f;
                     agent.SetDestination(target.position);
                     actor.AIThrow(false);
                 }
             }
             else
             {
+                aiDesiredSpeed = 0.25f;
                 agent.SetDestination(Vector3.up*1f);   
             }
         }

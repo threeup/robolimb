@@ -437,7 +437,7 @@ public class ActorBodyPart : MonoBehaviour
 
 	public void HitBy(ActorBodyPart other)
 	{
-		Debug.Log(this+"hit by "+other+" glueState"+glueState);
+		//Debug.Log(this+"hit by "+other+" glueState"+glueState);
 		Expire();
 	}
 }

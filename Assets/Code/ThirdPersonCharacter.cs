@@ -18,7 +18,6 @@ namespace UnityStandardAssets.Characters.ThirdPerson
 		[SerializeField] float animSpeedMultiplier = 1f;
 		[SerializeField] float groundCheckDistance = 0.1f;
 
-		ActorBody thisActorBody;
 
 
 		Rigidbody thisRigidbody;
@@ -37,7 +36,6 @@ namespace UnityStandardAssets.Characters.ThirdPerson
 
 		void Start()
 		{
-			thisActorBody = GetComponent<ActorBody>();
 			thisAnimator = GetComponent<Animator>();
 			thisRigidbody = GetComponent<Rigidbody>();
 			thisCapsule = GetComponent<CapsuleCollider>();
