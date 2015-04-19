@@ -96,7 +96,9 @@ namespace UnityStandardAssets.Characters.ThirdPerson
             }
 
             // pass all parameters to the character control script
-            thisCharacter.Move(moveVec, doCrouch, doJump);
+
+            float speed = thisActor.body.GetSpeed();
+            thisCharacter.Move(moveVec, speed, doCrouch, doJump);
             doJump = false;
         }
     }

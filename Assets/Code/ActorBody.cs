@@ -7,11 +7,12 @@ using BasicCommon;
 
 public class ActorBody : MonoBehaviour 
 {
-
+	public Actor thisActor;
 	public Animator thisAnimator;
 	public List<ActorBodyPart> bodyParts;
 	public Color mainColor;
 
+	public BasicTimer superTimer = new BasicTimer(0f);
 	public BasicTimer regrowTimer = new BasicTimer(2f);
 
 	BodyPartType weaponType = BodyPartType.ArmLeftLower;
@@ -33,7 +34,8 @@ public class ActorBody : MonoBehaviour
 	// Use this for initialization
 	void Awake () 
 	{
-		
+		weapon = null;
+		thrower = null;
 	}
 
 	public void Spawn(Color mainColor)
@@ -45,13 +47,21 @@ public class ActorBody : MonoBehaviour
 		}
 	}
 	
+	public bool IsSuper()
+	{
+		return !superTimer.IsPaused;
+	}
+
 	// Update is called once per frame
 	void Update () 
 	{
 		float deltaTime = Time.deltaTime;
+		superTimer.Tick(deltaTime);
 		if( regrowList.Count > 0 && regrowTimer.Tick(deltaTime) )
 		{
 			Regrow();
+			regrowTimer.Duration = 2f*(IsSuper() ? 4f : 1f);
+			regrowTimer.Reset();
 		}
 		currentDirection = 0.7f*this.transform.forward+0.5f*this.transform.up;
 		currentDirection.Normalize();
@@ -62,10 +72,6 @@ public class ActorBody : MonoBehaviour
 		GetWeapon();
 		GetThrower();
 		bool result = thrower != null && thrower.CanThrowStart() && weapon != null && weapon.CanWeaponStart();
-		if( !result )
-		{
-			Debug.Log("Cant Throw"+thrower+" "+weapon);
-		}
 		return result;
 	}
 
@@ -83,6 +89,7 @@ public class ActorBody : MonoBehaviour
 			bp = bp.parentPart;
 		}
 		regrowList.Remove(bp);
+		bp.growSpeed = IsSuper() ? 4f : 1f;
 		bp.machine.SetState(PartState.GROWING);
 	}
 
@@ -114,7 +121,7 @@ public class ActorBody : MonoBehaviour
 		EvaluateSelf();
 	}
 
-	public void Cycle()
+	public void SelectWeapon(ActorBodyPart bp)
 	{
 		if( weapon != null )
 		{
@@ -124,14 +131,35 @@ public class ActorBody : MonoBehaviour
 			}
 			else
 			{
-				Debug.Log(weapon+" cant cycle "+weapon.debugState);
+				Debug.Log("Failed to deselect"+weapon);
 				return;
 			}
 			weapon = null;
 		}
-		
-
-
+		weapon = bp;
+		if( weapon != null )
+		{
+			GetThrower();
+			if( thrower == null )
+			{
+				weapon = null;
+			}
+		}
+		if( weapon != null)
+		{
+			weapon.Select(true);
+		}
+	}
+	public void GetWeapon()
+	{
+		SelectWeapon( bodyParts.Find(x=>x.bodyPartType == weaponType && x.CanWeaponSelect()) );
+		if( weapon == null )
+		{
+			Cycle();
+		}
+	}
+	public void Cycle()
+	{
 		for(int i=0; i<10 && weapon == null; ++i)
 		{
 			switch(weaponType)
@@ -146,25 +174,10 @@ public class ActorBody : MonoBehaviour
 				case BodyPartType.LegLeftUpper: weaponType = BodyPartType.LegLeftLower; break;
 				case BodyPartType.LegLeftLower: weaponType = BodyPartType.ArmRightUpper; break;
 			}
-			weapon = bodyParts.Find(x=>x.bodyPartType == weaponType && x.CanWeaponSelect());
-			if( weapon != null )
-			{
-				GetThrower();
-				if( thrower == null )
-				{
-					weapon = null;
-				}
-			}
+			ActorBodyPart nextWeapon = bodyParts.Find(x=>x.bodyPartType == weaponType && x.CanWeaponSelect());
+			SelectWeapon(nextWeapon);
 		}
-		if( weapon == null )
-		{
-			Debug.Log("Failed to cycle"+weaponType+" "+throwerType);
-		}
-		if( weapon != null )
-		{
-			weapon.Select(true);
-		}
-		//Debug.Log("select"+weaponType+" "+throwerType+" "+thrower);
+		
 	}
 
 	public void GetThrower()
@@ -231,14 +244,7 @@ public class ActorBody : MonoBehaviour
 				return false;
 		}
 	}
-	public void GetWeapon()
-	{
-		weapon = bodyParts.Find(x=>x.bodyPartType == weaponType);
-		if( weapon == null )
-		{
-			Cycle();
-		}
-	}
+
 
 	public void Register(ActorBodyPart bp)
 	{
@@ -295,5 +301,26 @@ public class ActorBody : MonoBehaviour
 		{	
 
 		}
+	}
+
+	public float GetSpeed()
+	{
+
+        if( canWalkNormal )
+        {
+        	return 1f;
+        }
+        else if( canWalkHop )
+        {
+            return 0.3f;       
+        }
+        else if( canWalkKneel )
+        {
+            return 0.2f;       
+        }
+        else
+        {
+            return 0.05f;
+        }
 	}
 }

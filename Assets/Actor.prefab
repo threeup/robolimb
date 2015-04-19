@@ -4134,6 +4134,7 @@ MonoBehaviour:
   depth: -1
   stateLock: 0
   debugState: 0
+  growSpeed: 1
 --- !u!114 &11402824
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -4157,6 +4158,7 @@ MonoBehaviour:
   depth: -1
   stateLock: 0
   debugState: 0
+  growSpeed: 1
 --- !u!114 &11403304
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -4168,7 +4170,47 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8c5335f0882fe4d478883cc8c58ce906, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  actor: {fileID: 0}
   target: {fileID: 0}
+  majorTimer:
+    timeVal: 10
+    duration: 10
+  minorTimer:
+    timeVal: 1
+    duration: 1
+  runTimer:
+    timeVal: 8
+    duration: 8
+  runCurve:
+    serializedVersion: 2
+    m_Curve:
+    - time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+    - time: .404890776
+      value: .170625806
+      inSlope: -1.59591436
+      outSlope: -1.59591436
+      tangentMode: 0
+    - time: .624521852
+      value: .803828776
+      inSlope: .90315938
+      outSlope: .90315938
+      tangentMode: 0
+    - time: .820367277
+      value: .54020381
+      inSlope: 1.12324953
+      outSlope: 1.12324953
+      tangentMode: 0
+    - time: 1
+      value: .0106390119
+      inSlope: -.975077271
+      outSlope: -.975077271
+      tangentMode: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 1
 --- !u!114 &11410842
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -4192,6 +4234,7 @@ MonoBehaviour:
   depth: -1
   stateLock: 0
   debugState: 0
+  growSpeed: 1
 --- !u!114 &11422016
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -4203,10 +4246,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d69443f5495df7d4fa6aa76af1643668, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  team: 0
   throwPhase: 0
   headDistance: 0
   body: {fileID: 11436570}
   throwTimer:
+    timeVal: 0
+    duration: 0
+  superTimer:
     timeVal: 0
     duration: 0
 --- !u!114 &11424978
@@ -4232,6 +4279,7 @@ MonoBehaviour:
   depth: -1
   stateLock: 0
   debugState: 0
+  growSpeed: 1
 --- !u!114 &11428638
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -4255,6 +4303,7 @@ MonoBehaviour:
   depth: -1
   stateLock: 0
   debugState: 0
+  growSpeed: 1
 --- !u!114 &11433232
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -4278,6 +4327,7 @@ MonoBehaviour:
   depth: -1
   stateLock: 0
   debugState: 0
+  growSpeed: 1
 --- !u!114 &11436570
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -4289,8 +4339,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 81bdb48dfe5b1844e81d909e2e836053, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  thisActor: {fileID: 0}
   thisAnimator: {fileID: 9520338}
   bodyParts: []
+  mainColor: {r: 0, g: 0, b: 0, a: 0}
+  superTimer:
+    timeVal: 0
+    duration: 0
   regrowTimer:
     timeVal: 2
     duration: 2
@@ -4322,6 +4377,7 @@ MonoBehaviour:
   depth: -1
   stateLock: 0
   debugState: 0
+  growSpeed: 1
 --- !u!114 &11438992
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -4345,6 +4401,7 @@ MonoBehaviour:
   depth: -1
   stateLock: 0
   debugState: 0
+  growSpeed: 1
 --- !u!114 &11439784
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -4368,6 +4425,7 @@ MonoBehaviour:
   depth: -1
   stateLock: 0
   debugState: 0
+  growSpeed: 1
 --- !u!114 &11454470
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -4391,6 +4449,7 @@ MonoBehaviour:
   depth: -1
   stateLock: 0
   debugState: 0
+  growSpeed: 1
 --- !u!114 &11463146
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -4414,6 +4473,7 @@ MonoBehaviour:
   depth: -1
   stateLock: 0
   debugState: 0
+  growSpeed: 1
 --- !u!114 &11465898
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -4450,6 +4510,7 @@ MonoBehaviour:
   depth: -1
   stateLock: 0
   debugState: 0
+  growSpeed: 1
 --- !u!114 &11470092
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -4473,6 +4534,7 @@ MonoBehaviour:
   depth: -1
   stateLock: 0
   debugState: 0
+  growSpeed: 1
 --- !u!114 &11479472
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -4496,6 +4558,7 @@ MonoBehaviour:
   depth: -1
   stateLock: 0
   debugState: 0
+  growSpeed: 1
 --- !u!114 &11481650
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -4519,6 +4582,7 @@ MonoBehaviour:
   depth: -1
   stateLock: 0
   debugState: 0
+  growSpeed: 1
 --- !u!114 &11487380
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -4542,6 +4606,7 @@ MonoBehaviour:
   depth: -1
   stateLock: 0
   debugState: 0
+  growSpeed: 1
 --- !u!114 &11491646
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -4565,6 +4630,7 @@ MonoBehaviour:
   depth: -1
   stateLock: 0
   debugState: 0
+  growSpeed: 1
 --- !u!114 &11494910
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -4610,6 +4676,7 @@ MonoBehaviour:
   depth: -1
   stateLock: 0
   debugState: 0
+  growSpeed: 1
 --- !u!114 &11499842
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -4633,6 +4700,7 @@ MonoBehaviour:
   depth: -1
   stateLock: 0
   debugState: 0
+  growSpeed: 1
 --- !u!135 &13533536
 SphereCollider:
   m_ObjectHideFlags: 1
@@ -4818,7 +4886,7 @@ NavMeshAgent:
   m_GameObject: {fileID: 186520}
   m_Enabled: 0
   m_Radius: .5
-  m_Speed: 3.5
+  m_Speed: 1
   m_Acceleration: 8
   avoidancePriority: 50
   m_AngularSpeed: 120

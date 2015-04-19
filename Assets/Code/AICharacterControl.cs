@@ -9,17 +9,22 @@ namespace UnityStandardAssets.Characters.ThirdPerson
     [RequireComponent(typeof (ThirdPersonCharacter))]
     public class AICharacterControl : MonoBehaviour
     {
+        public Actor actor;
         public NavMeshAgent agent { get; private set; } // the navmesh agent required for the path finding
         public ThirdPersonCharacter character { get; private set; } // the character we are controlling
         public Transform target; // target to aim for
+        private Transform firstTarget; // target to aim for
 
         public BasicTimer majorTimer = new BasicTimer(10f, true);
         public BasicTimer minorTimer = new BasicTimer(1f, true);
+        public BasicTimer runTimer = new BasicTimer(8f, true);
+        public AnimationCurve runCurve;
 
         // Use this for initialization
         private void Start()
         {
             // get the components on the object we need ( should not be null due to require component so no need to check )
+            actor = GetComponent<Actor>();
             agent = GetComponentInChildren<NavMeshAgent>();
             character = GetComponent<ThirdPersonCharacter>();
 
@@ -32,6 +37,10 @@ namespace UnityStandardAssets.Characters.ThirdPerson
         private void Update()
         {
             float deltaTime = Time.deltaTime;
+            if( firstTarget == null )
+            {
+                DoMajor(0);
+            }
             if( majorTimer.Tick(deltaTime) )
             {
                 DoMajor();
@@ -41,8 +50,18 @@ namespace UnityStandardAssets.Characters.ThirdPerson
                 DoMinor();
             }
 
+            runTimer.Tick(deltaTime);
 
-            character.Move(agent.desiredVelocity, false, false);
+            float throttle = runCurve.Evaluate(runTimer.Percent);
+            float actorSpeed = actor.body.GetSpeed();
+            float runSpeed = Mathf.Clamp(throttle, 0f, actorSpeed);
+
+            agent.speed = runSpeed*1f;
+            agent.angularSpeed = (1f-throttle)*120f;
+
+
+
+            character.Move(agent.desiredVelocity, 1f, false, false);
 
         }
 
@@ -50,7 +69,17 @@ namespace UnityStandardAssets.Characters.ThirdPerson
         {
             if( target != null )
             {
-                agent.SetDestination(target.position);
+                float distSq = (this.transform.position - target.position).sqrMagnitude;
+                if( distSq < 3f*3f )
+                {
+                    agent.SetDestination(this.transform.position);
+                    actor.AIThrow(true);
+                }
+                else
+                {
+                    agent.SetDestination(target.position);
+                    actor.AIThrow(false);
+                }
             }
             else
             {
@@ -59,12 +88,17 @@ namespace UnityStandardAssets.Characters.ThirdPerson
         }
 
 
-        void DoMajor()
+        void DoMajor(int roll = -1)
         {
-            int roll = UnityEngine.Random.Range(0,5);
+            if( roll < 0 )
+            {
+                roll = UnityEngine.Random.Range(0,5);
+            } 
             switch(roll)
             {
                 case 0:
+                    TargetRandom(); 
+                    break;
                 case 1:
                 case 2:
                 case 3:
@@ -77,6 +111,24 @@ namespace UnityStandardAssets.Characters.ThirdPerson
                     target = null;
                     break;
             }
+            if( firstTarget == null )
+            {
+                firstTarget = target;
+            }
+        }
+
+        void TargetRandom()
+        {
+            List<Actor> livingActors = Game.Instance.livingActors;
+            this.target = null;
+            for(int i=0; i<livingActors.Count && target == null; ++i)
+            {
+                int roll = UnityEngine.Random.Range(0, livingActors.Count);
+                if( livingActors[roll].team != this.actor.team )
+                {
+                    this.target = livingActors[roll].transform;
+                }
+            }
         }
 
         void TargetNearest()
@@ -86,14 +138,20 @@ namespace UnityStandardAssets.Characters.ThirdPerson
             Actor bestActor = null;
             foreach(Actor actor in livingActors)
             {
-                float distSq = (this.transform.position - actor.transform.position).sqrMagnitude;
-                if( distSq < bestDistSq )
+                if( actor.team != this.actor.team )
                 {
-                    bestDistSq = distSq;
-                    bestActor = actor;
+                    float distSq = (this.transform.position - actor.transform.position).sqrMagnitude;
+                    if( distSq < bestDistSq )
+                    {
+                        bestDistSq = distSq;
+                        bestActor = actor;
+                    }
                 }
             }
-            this.target = bestActor.transform;
+            if( bestActor != null )
+            {
+                this.target = bestActor.transform;
+            }
         }
 
         void TargetItem()
@@ -110,7 +168,10 @@ namespace UnityStandardAssets.Characters.ThirdPerson
                     bestItem = item;
                 }
             }
-            this.target = bestItem.transform;
+            if( bestItem != null )
+            {
+                this.target = bestItem.transform;
+            }
         }
     }
 }

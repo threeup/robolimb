@@ -9,4 +9,15 @@ public class Item : MonoBehaviour
 	{
 		Game.Instance.Register(this);
 	}
+
+	public void OnTriggerEnter(Collider other)
+	{
+		Actor actor = other.GetComponent<Actor>();
+		if( actor != null )
+		{
+			actor.GoSuper();
+			Game.Instance.Deregister(this);
+			Destroy(this.gameObject);
+		}
+	}
 }

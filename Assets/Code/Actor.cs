@@ -19,6 +19,8 @@ public class Actor : MonoBehaviour
 	public float headDistance = 0f;
 	public ActorBody body;
 	public BasicTimer throwTimer = new BasicTimer(0);
+	public BasicTimer superTimer = new BasicTimer(0);
+	public bool aiThrow;
 
 	float lastCycle = 0f;
 	// Use this for initialization
@@ -49,6 +51,11 @@ public class Actor : MonoBehaviour
 		}
 	}
 
+	public void GoSuper()
+	{
+		body.superTimer = new BasicTimer(2f, false);
+	}
+
 	public void AdvanceThrow()
 	{
 		switch(throwPhase)
@@ -59,6 +66,10 @@ public class Actor : MonoBehaviour
 					throwTimer = new BasicTimer(1f, false);
 					body.AlignToThrower();
 					throwPhase = ThrowPhase.ALIGN;
+				}
+				else
+				{
+					TryCycle();
 				}
 				break;
 			case ThrowPhase.ALIGN: 
@@ -114,5 +125,11 @@ public class Actor : MonoBehaviour
 			body.Cycle();
 			lastCycle = Time.time;
 		}
+	}
+
+	public void AIThrow(bool val)
+	{
+		aiThrow = val;
+		Throwing(val, false);
 	}
 }

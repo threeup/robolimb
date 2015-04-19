@@ -108,6 +108,21 @@ public class Game : MonoBehaviour
 			livingItems.Add(item);
 		}
 	}
+	public void Deregister(Actor actor)
+	{
+		if( livingActors.Contains(actor) )
+		{
+			livingActors.Remove(actor);
+		}
+	}
+    public void Deregister(Item item)
+	{
+		if( livingItems.Contains(item) )
+		{
+			livingItems.Remove(item);
+		}
+	}
+
 
 	bool CanSpawn()
 	{
@@ -129,8 +144,11 @@ public class Game : MonoBehaviour
 			{
 				spawner.spawnType = SpawnType.ACTOR_PC;
 				go = spawner.Spawn();
-				autoCam.SetTarget(go.transform);
-				alivePC++;
+				if( go != null )
+				{
+					autoCam.SetTarget(go.transform);
+					alivePC++;
+				}
 			}
 			else
 			{

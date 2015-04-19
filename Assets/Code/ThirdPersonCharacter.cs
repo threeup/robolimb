@@ -49,7 +49,7 @@ namespace UnityStandardAssets.Characters.ThirdPerson
 		}
 
 
-		public void Move(Vector3 move, bool crouch, bool jump)
+		public void Move(Vector3 move, float speed, bool crouch, bool jump)
 		{
 
 			// convert the world relative moveInput vector into a local-relative
@@ -59,23 +59,8 @@ namespace UnityStandardAssets.Characters.ThirdPerson
 			move = transform.InverseTransformDirection(move);
 			CheckGroundStatus();
 			move = Vector3.ProjectOnPlane(move, groundNormal);
-
-			if( !thisActorBody.canWalkNormal )
-			{
-				if( thisActorBody.canWalkHop )
-				{
-					move *= 0.3f;		
-				}
-				else if( thisActorBody.canWalkKneel )
-				{
-					move *= 0.2f;		
-				}
-				else
-				{
-					move *= 0.05f;
-				}
-			}
-
+			move *= speed;
+			
 			turnAmount = Mathf.Atan2(move.x, move.z);
 			forwardAmount = move.z;
 

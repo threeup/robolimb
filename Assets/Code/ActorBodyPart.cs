@@ -90,6 +90,8 @@ public class ActorBodyPart : MonoBehaviour
 	private GlueState glueState;
 	public PartState debugState;
 
+	public float growSpeed = 1f;
+
 	private Vector3 nextForce = Vector3.zero;
 
 	void Awake()
@@ -284,7 +286,7 @@ public class ActorBodyPart : MonoBehaviour
 	void OnGrow()
 	{
 		StateLock(true);
-		thisTransform.DOScale(originalScale, 1f).OnComplete(Reregister);	
+		thisTransform.DOScale(originalScale, 1f/growSpeed).OnComplete(Reregister);	
 	}
 
 	public void Glue(GlueState nextGlueState)
