@@ -16,6 +16,8 @@ namespace UnityStandardAssets.Characters.ThirdPerson
 		[SerializeField] float animSpeedMultiplier = 1f;
 		[SerializeField] float groundCheckDistance = 0.1f;
 
+		ActorBody thisActorBody;
+
 		Rigidbody thisRigidbody;
 		Animator thisAnimator;
 		bool isGrounded;
@@ -32,6 +34,7 @@ namespace UnityStandardAssets.Characters.ThirdPerson
 
 		void Start()
 		{
+			thisActorBody = GetComponent<ActorBody>();
 			thisAnimator = GetComponent<Animator>();
 			thisRigidbody = GetComponent<Rigidbody>();
 			thisCapsule = GetComponent<CapsuleCollider>();
@@ -53,8 +56,22 @@ namespace UnityStandardAssets.Characters.ThirdPerson
 			move = transform.InverseTransformDirection(move);
 			CheckGroundStatus();
 			move = Vector3.ProjectOnPlane(move, groundNormal);
+
+			if( !thisActorBody.canWalkNormal )
+			{
+				if( !thisActorBody.canWalkKneel )
+				{
+					move *= 0.01f;		
+				}
+				else
+				{
+					move *= 0.2f;
+				}
+			}
+
 			turnAmount = Mathf.Atan2(move.x, move.z);
 			forwardAmount = move.z;
+
 
 			ApplyExtraTurnRotation();
 

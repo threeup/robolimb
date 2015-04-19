@@ -132,6 +132,15 @@ namespace GumboLib
 			return SetState(previousState);
 		}
 
+		public bool? SetFailedState()
+		{
+			if( failedState == null )
+			{
+				return null;
+			}
+			return SetState(failedState);
+		}
+
 		public void RepeatEnter()
 		{
 			if (currentState.OnExit != null) { currentState.OnExit(); }

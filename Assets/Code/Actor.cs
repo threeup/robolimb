@@ -40,7 +40,7 @@ public class Actor : MonoBehaviour
 		switch(throwPhase)
 		{
 			case ThrowPhase.NONE:
-				if( body.canThrow )
+				if( body.CanThrowStart() )
 				{
 					throwTimer = new BasicTimer(1f);
 					body.AlignToThrower();
@@ -53,10 +53,12 @@ public class Actor : MonoBehaviour
 				throwPhase = ThrowPhase.CHARGE;
 				break;
 			case ThrowPhase.CHARGE: 
-				Debug.Log("Charged, throw"+throwTimer.Percent);
-				body.Launch(throwTimer.Percent);
-				throwTimer.Pause(true);
-				throwPhase = ThrowPhase.NONE;
+				if( body.CanThrowFinish() )
+				{
+					body.Launch(throwTimer.Percent);
+					throwTimer.Pause(true);
+					throwPhase = ThrowPhase.NONE;
+				}
 				break;
 			default: 
 				break;

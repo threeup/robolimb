@@ -69,10 +69,6 @@ namespace UnityStandardAssets.Characters.ThirdPerson
                 // we use world-relative directions in the case of no main camera
                 moveVec = v*Vector3.forward + h*Vector3.right;
             }
-#if !MOBILE_INPUT
-			// walk speed multiplier
-	        if (Input.GetKey(KeyCode.LeftShift)) moveVec *= 0.5f;
-#endif
 
             // pass all parameters to the character control script
             thisCharacter.Move(moveVec, doCrouch, doJump);

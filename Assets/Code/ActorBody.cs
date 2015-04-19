@@ -23,7 +23,6 @@ public class ActorBody : MonoBehaviour
 
 	public GameObject skeleton;
 
-	public bool canThrow = true;
 	public bool canWalkNormal = true;
 	public bool canWalkKneel = true;
 
@@ -32,12 +31,7 @@ public class ActorBody : MonoBehaviour
 	// Use this for initialization
 	void Awake () 
 	{
-		ActorBodyPart[] bpList = GetComponentsInChildren<ActorBodyPart>();
-		bodyParts = new List<ActorBodyPart>(bpList);	
-		foreach(ActorBodyPart bp in bodyParts)
-		{
-			bp.thisBody = this;
-		}
+		
 	}
 	
 	// Update is called once per frame
@@ -51,16 +45,30 @@ public class ActorBody : MonoBehaviour
 		currentDirection = this.transform.forward;
 	}
 
+	public bool CanThrowStart()
+	{
+		GetThrower();
+		GetWeapon();
+		return thrower != null && thrower.CanThrowStart() && weapon != null && weapon.CanWeaponStart();
+	}
+
+	public bool CanThrowFinish()
+	{
+		GetThrower();
+		GetWeapon();
+		return thrower != null && thrower.CanThrowFinish() && weapon != null && weapon.CanWeaponFinish();
+	}
+
 	void Regrow()
 	{
 		regrowList.Sort(delegate(ActorBodyPart p1, ActorBodyPart p2)
 			{
 			    return p1.depth.CompareTo(p2.depth);
 			});
-		
+
 		ActorBodyPart bp = regrowList[0];
 		regrowList.RemoveAt(0);
-		bp.Grow();
+		bp.machine.SetState(PartState.GROWING);
 	}
 
 	
@@ -68,21 +76,22 @@ public class ActorBody : MonoBehaviour
 	{
 		GetThrower();
 		GetWeapon();
-		ActorBodyPart bp = weapon;
-		bp.AlignTo(thrower);
+		weapon.nextParent = thrower.transform;
+		
+		thrower.machine.SetState(PartState.GRABBING);
+		weapon.machine.SetState(PartState.ALIGNING);
 	}
 
 	public void Animate()
 	{
-		ActorBodyPart bp = thrower;
-		bp.Animate();
+		thrower.machine.SetState(PartState.ANIMATING);
 	}
 
 	public void Launch(float amount)
 	{
-		ActorBodyPart bp = weapon;
-		bp.Launch(amount*maxForce, currentDirection);
-		Deregister(bp);
+		thrower.machine.SetState(PartState.ATTACHED);
+		weapon.Launch(amount*maxForce, currentDirection);
+		Deregister(weapon);
 		EvaluateSelf();
 	}
 
@@ -90,17 +99,33 @@ public class ActorBody : MonoBehaviour
 	{
 		if( weapon != null )
 		{
-			weapon.Select(false);
+			if( weapon.CanWeaponDeselect() )
+			{
+				weapon.Select(false);
+			}
+			else
+			{
+				return;
+			}
 		}
 		weapon = null;
+		
+
+
 		for(int i=0; i<10 && weapon == null; ++i)
 		{
-			int weaponTypeIdx = (int)weaponType + 1;
-			if( weaponTypeIdx < 10 || weaponTypeIdx > 17 )
+			switch(weaponType)
 			{
-				weaponTypeIdx = 10;
+				case BodyPartType.ArmRightUpper: weaponType = BodyPartType.ArmRightLower; break;
+				case BodyPartType.ArmRightLower: weaponType = BodyPartType.ArmLeftUpper; break;
+				default:
+				case BodyPartType.ArmLeftUpper: weaponType = BodyPartType.ArmLeftLower; break;
+				case BodyPartType.ArmLeftLower: weaponType = BodyPartType.LegRightUpper; break;
+				case BodyPartType.LegRightUpper: weaponType = BodyPartType.LegRightLower; break;
+				case BodyPartType.LegRightLower: weaponType = BodyPartType.LegLeftUpper; break;
+				case BodyPartType.LegLeftUpper: weaponType = BodyPartType.LegLeftLower; break;
+				case BodyPartType.LegLeftLower: weaponType = BodyPartType.ArmRightUpper; break;
 			}
-			weaponType = (BodyPartType)weaponTypeIdx;
 			weapon = bodyParts.Find(x=>x.bodyPartType == weaponType);
 			if( weapon != null && SameArm(weaponType,throwerType) )
 			{
@@ -109,17 +134,12 @@ public class ActorBody : MonoBehaviour
 				if( switchThrower == null )
 				{
 					weapon = null;
-					Debug.Log("cant use"+weaponType+" with "+throwerType);
 				}
 				else
 				{
 					thrower = switchThrower;
 					throwerType = switchThrowerType;
 				}				
-			}
-			if( weapon == null )
-			{
-				Debug.Log("missing"+weaponType);
 			}
 		}
 		if( weapon == null )
@@ -130,11 +150,16 @@ public class ActorBody : MonoBehaviour
 		{
 			weapon.Select(true);
 		}
+		//Debug.Log("select"+weaponType+" "+throwerType+" "+thrower);
 	}
 
 	public void GetThrower()
 	{
-		thrower = bodyParts.Find(x=>x.bodyPartType == throwerType);
+		thrower = null;
+		if( throwerType != BodyPartType.None )
+		{
+			thrower = bodyParts.Find(x=>x.bodyPartType == throwerType);
+		}
 	}
 	
 
@@ -177,20 +202,24 @@ public class ActorBody : MonoBehaviour
 		}
 	}
 
-	public void Reregister(ActorBodyPart bp)
+	public void Register(ActorBodyPart bp)
 	{
+		
 		bodyParts.Add(bp);
 		EvaluateSelf();
 	}
 	void Deregister(ActorBodyPart bp)
 	{
 		bodyParts.Remove(bp);
-		regrowList.Add(bp);
-		
 		if( bp.childPart != null )
 		{
 			Deregister(bp.childPart);
 		}
+	}
+
+	public void Dormant(ActorBodyPart bp)
+	{
+		regrowList.Add(bp);
 	}
 
 	public void EvaluateSelf()
@@ -216,20 +245,17 @@ public class ActorBody : MonoBehaviour
 		{
 			throwerType = BodyPartType.None;
 		}	
-		canThrow = throwerType != BodyPartType.None;
 		if( canWalkNormal )
 		{
-			thisAnimator.enabled = true;
 			skeleton.transform.position = Vector3.zero;
 		}
 		else if( canWalkKneel )
 		{
-			thisAnimator.enabled = true;
 			skeleton.transform.position = 0.31f*Vector3.down;
 		}
 		else
-		{
-			thisAnimator.enabled = false;
+		{	
+
 		}
 	}
 }
