@@ -7,10 +7,11 @@ public enum SpawnType
 {
 	ACTOR_PC,
 	ACTOR_AI,
-	POWERUP,
+	ITEM,
 }
 public class Spawner : MonoBehaviour 
 {
+	public ActorTeam team;
 	public SpawnType spawnType;
 	public GameObject prefab;
 	public bool selfSpawn = false;
@@ -41,17 +42,22 @@ public class Spawner : MonoBehaviour
 	public GameObject Spawn()
 	{
 		spawned = Instantiate(prefab, this.transform.position, this.transform.rotation) as GameObject;
-		ThirdPersonUserControl user = spawned.GetComponent<ThirdPersonUserControl>();;
+		ThirdPersonUserControl user = spawned.GetComponent<ThirdPersonUserControl>();
+		Actor actor = spawned.GetComponent<Actor>();
+		Item item = spawned.GetComponent<Item>();
 		switch(spawnType)
 		{
 			case SpawnType.ACTOR_PC:
 				user.Spawn(true);
+				actor.Spawn(team);
 				break;
 			case SpawnType.ACTOR_AI:
 				user.Spawn(false);
+				actor.Spawn(team);
 				break;
 			default:
-			case SpawnType.POWERUP:
+			case SpawnType.ITEM:
+				item.Spawn();
 				break;
 		}
 		return spawned;

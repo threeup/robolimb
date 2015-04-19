@@ -2,6 +2,7 @@
 using System.Collections;
 using BasicCommon;
 
+
 public class Actor : MonoBehaviour 
 {
 
@@ -12,6 +13,7 @@ public class Actor : MonoBehaviour
 		CHARGE,
 		FLY
 	}
+	public ActorTeam team = ActorTeam.NONE;
 	public ThrowPhase throwPhase = ThrowPhase.NONE;
 
 	public float headDistance = 0f;
@@ -23,6 +25,18 @@ public class Actor : MonoBehaviour
 	void Start () 
 	{
 	
+	}
+
+	public void Spawn(ActorTeam team)
+	{
+		this.team = team;
+		switch(team)
+		{
+			case ActorTeam.RED: body.Spawn(Color.red); break;
+			case ActorTeam.BLUE: body.Spawn(Color.blue); break;
+			case ActorTeam.NONE: body.Spawn(Color.grey); break;
+		}
+		Game.Instance.Register(this);
 	}
 	
 	// Update is called once per frame

@@ -10,6 +10,7 @@ public class ActorBody : MonoBehaviour
 
 	public Animator thisAnimator;
 	public List<ActorBodyPart> bodyParts;
+	public Color mainColor;
 
 	public BasicTimer regrowTimer = new BasicTimer(2f);
 
@@ -33,6 +34,15 @@ public class ActorBody : MonoBehaviour
 	void Awake () 
 	{
 		
+	}
+
+	public void Spawn(Color mainColor)
+	{
+		this.mainColor = mainColor;
+		foreach(ActorBodyPart bp in bodyParts)
+		{
+			bp.SetColor(mainColor);
+		}
 	}
 	
 	// Update is called once per frame
@@ -117,8 +127,8 @@ public class ActorBody : MonoBehaviour
 				Debug.Log(weapon+" cant cycle "+weapon.debugState);
 				return;
 			}
+			weapon = null;
 		}
-		weapon = null;
 		
 
 
@@ -136,20 +146,13 @@ public class ActorBody : MonoBehaviour
 				case BodyPartType.LegLeftUpper: weaponType = BodyPartType.LegLeftLower; break;
 				case BodyPartType.LegLeftLower: weaponType = BodyPartType.ArmRightUpper; break;
 			}
-			weapon = bodyParts.Find(x=>x.bodyPartType == weaponType);
+			weapon = bodyParts.Find(x=>x.bodyPartType == weaponType && x.CanWeaponSelect());
 			if( weapon != null )
 			{
-				if( !weapon.CanWeaponSelect() )
+				GetThrower();
+				if( thrower == null )
 				{
 					weapon = null;
-				}
-				else
-				{
-					GetThrower();
-					if( thrower == null )
-					{
-						weapon = null;
-					}
 				}
 			}
 		}
@@ -196,7 +199,7 @@ public class ActorBody : MonoBehaviour
 				}
 			}
 		}
-		if( thrower = null)
+		if( thrower == null )
 		{
 			throwerType = BodyPartType.None;
 		}

@@ -13,13 +13,22 @@ public enum GameState
 	FINISHED
 }
 
+public enum ActorTeam
+{
+	NONE,
+	RED,
+	BLUE,
+}
 
 public class Game : MonoBehaviour 
 {
 	public static Game Instance;
 	List<Spawner> spawners = new List<Spawner>();
+	public List<Actor> livingActors = new List<Actor>();
+	public List<Item> livingItems = new List<Item>();
 	public BasicMachine<GameState> machine;
 	public AutoCam autoCam;
+
 
 
 	void Awake()
@@ -85,6 +94,20 @@ public class Game : MonoBehaviour
 		machine.RetryFailedState();
 
 	}
+    public void Register(Actor actor)
+	{
+		if( !livingActors.Contains(actor) )
+		{
+			livingActors.Add(actor);
+		}
+	}
+    public void Register(Item item)
+	{
+		if( !livingItems.Contains(item) )
+		{
+			livingItems.Add(item);
+		}
+	}
 
 	bool CanSpawn()
 	{
@@ -97,17 +120,22 @@ public class Game : MonoBehaviour
 		int desiredPC = 1;
 		foreach(Spawner spawner in spawners)
 		{
+			if( spawner.selfSpawn )
+			{
+				continue;
+			}
+			GameObject go = null;
 			if(alivePC < desiredPC)
 			{
 				spawner.spawnType = SpawnType.ACTOR_PC;
-				GameObject go = spawner.Spawn();
+				go = spawner.Spawn();
 				autoCam.SetTarget(go.transform);
 				alivePC++;
 			}
 			else
 			{
 				spawner.spawnType = SpawnType.ACTOR_AI;
-				spawner.Spawn();
+				go = spawner.Spawn();
 			}
 		}
 	}
