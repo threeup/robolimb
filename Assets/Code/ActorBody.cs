@@ -24,7 +24,8 @@ public class ActorBody : MonoBehaviour
 	public GameObject skeleton;
 
 	public bool canWalkNormal = true;
-	public bool canWalkKneel = true;
+	public bool canWalkHop = false;
+	public bool canWalkKneel = false;
 
 	List<ActorBodyPart> regrowList = new List<ActorBodyPart>();
 
@@ -42,44 +43,49 @@ public class ActorBody : MonoBehaviour
 		{
 			Regrow();
 		}
-		currentDirection = this.transform.forward;
+		currentDirection = 0.7f*this.transform.forward+0.5f*this.transform.up;
+		currentDirection.Normalize();
 	}
 
 	public bool CanThrowStart()
 	{
-		GetThrower();
 		GetWeapon();
-		return thrower != null && thrower.CanThrowStart() && weapon != null && weapon.CanWeaponStart();
+		GetThrower();
+		bool result = thrower != null && thrower.CanThrowStart() && weapon != null && weapon.CanWeaponStart();
+		if( !result )
+		{
+			Debug.Log("Cant Throw"+thrower+" "+weapon);
+		}
+		return result;
 	}
 
 	public bool CanThrowFinish()
 	{
-		GetThrower();
-		GetWeapon();
 		return thrower != null && thrower.CanThrowFinish() && weapon != null && weapon.CanWeaponFinish();
 	}
 
 	void Regrow()
 	{
-		regrowList.Sort(delegate(ActorBodyPart p1, ActorBodyPart p2)
-			{
-			    return p1.depth.CompareTo(p2.depth);
-			});
 
 		ActorBodyPart bp = regrowList[0];
-		regrowList.RemoveAt(0);
+		while( bp.parentPart != null && regrowList.Contains(bp.parentPart) )
+		{
+			bp = bp.parentPart;
+		}
+		regrowList.Remove(bp);
 		bp.machine.SetState(PartState.GROWING);
 	}
 
 	
 	public void AlignToThrower()
 	{
-		GetThrower();
 		GetWeapon();
+		GetThrower();
 		weapon.handParent = thrower.transform;
 		
 		thrower.machine.SetState(PartState.GRABBING);
 		weapon.machine.SetState(PartState.ALIGNING);
+		EvaluateSelf();
 	}
 
 	public void Animate()
@@ -89,9 +95,12 @@ public class ActorBody : MonoBehaviour
 
 	public void Launch(float amount)
 	{
+		amount = 0.33f+0.67f*amount;
 		thrower.machine.SetState(PartState.ATTACHED);
 		weapon.Launch(amount*maxForce, currentDirection);
 		Deregister(weapon);
+		weapon = null;
+		thrower = null;
 		EvaluateSelf();
 	}
 
@@ -105,6 +114,7 @@ public class ActorBody : MonoBehaviour
 			}
 			else
 			{
+				Debug.Log(weapon+" cant cycle "+weapon.debugState);
 				return;
 			}
 		}
@@ -127,24 +137,25 @@ public class ActorBody : MonoBehaviour
 				case BodyPartType.LegLeftLower: weaponType = BodyPartType.ArmRightUpper; break;
 			}
 			weapon = bodyParts.Find(x=>x.bodyPartType == weaponType);
-			if( weapon != null && SameArm(weaponType,throwerType) )
+			if( weapon != null )
 			{
-				BodyPartType switchThrowerType = throwerType == BodyPartType.ArmRightHand ? BodyPartType.ArmLeftHand : BodyPartType.ArmRightHand;
-				ActorBodyPart switchThrower = bodyParts.Find(x=>x.bodyPartType == switchThrowerType);
-				if( switchThrower == null )
+				if( !weapon.CanWeaponSelect() )
 				{
 					weapon = null;
 				}
 				else
 				{
-					thrower = switchThrower;
-					throwerType = switchThrowerType;
-				}				
+					GetThrower();
+					if( thrower == null )
+					{
+						weapon = null;
+					}
+				}
 			}
 		}
 		if( weapon == null )
 		{
-			Debug.Log("Failed to cycle"+weaponType);
+			Debug.Log("Failed to cycle"+weaponType+" "+throwerType);
 		}
 		if( weapon != null )
 		{
@@ -156,17 +167,57 @@ public class ActorBody : MonoBehaviour
 	public void GetThrower()
 	{
 		thrower = null;
-		if( throwerType != BodyPartType.None )
+		throwerType = BodyPartType.None;
+		if( weaponType != BodyPartType.None )
 		{
-			thrower = bodyParts.Find(x=>x.bodyPartType == throwerType);
+			bool weaponRight = IsRightArm(weaponType);
+			bool weaponLeft = IsLeftArm(weaponType);
+			if(weaponRight)
+			{
+				throwerType = BodyPartType.ArmLeftHand;
+				thrower = bodyParts.Find(x=>x.bodyPartType == throwerType);
+				if( thrower != null && !thrower.CanThrowStart() )
+				{
+					thrower = null;
+					throwerType = BodyPartType.None;
+				}
+			}
+			else if(weaponLeft)
+			{
+				throwerType = BodyPartType.ArmRightHand;	
+				thrower = bodyParts.Find(x=>x.bodyPartType == throwerType);
+				if( thrower != null && !thrower.CanThrowStart() )
+				{
+					thrower = null;
+					throwerType = BodyPartType.None;
+				}
+			}
+			else
+			{
+				if( thrower == null )
+				{
+					throwerType = BodyPartType.ArmRightHand;
+					thrower = bodyParts.Find(x=>x.bodyPartType == throwerType);
+					if( thrower != null && !thrower.CanThrowStart() )
+					{
+						thrower = null;
+						throwerType = BodyPartType.None;
+					}
+				}
+				if( thrower == null )
+				{
+					throwerType = BodyPartType.ArmLeftHand;
+					thrower = bodyParts.Find(x=>x.bodyPartType == throwerType);
+					if( thrower != null && !thrower.CanThrowStart() )
+					{
+						thrower = null;
+						throwerType = BodyPartType.None;
+					}
+				}
+			}
 		}
 	}
 	
-
-	bool SameArm(BodyPartType first, BodyPartType second)
-	{
-		return (IsLeftArm(first) && IsLeftArm(second)) || (IsRightArm(first) && IsRightArm(second));
-	}
 	bool IsLeftArm(BodyPartType part)
 	{
 		switch(part)
@@ -219,39 +270,39 @@ public class ActorBody : MonoBehaviour
 
 	public void Dormant(ActorBodyPart bp)
 	{
-		regrowList.Add(bp);
+		if( bp.bodyPartType == BodyPartType.Head)
+		{
+			Debug.Log("Death!");
+			foreach(ActorBodyPart bodyPart in bodyParts)
+			{
+				bodyPart.Expire();
+			}
+		}
+		else
+		{
+			regrowList.Add(bp);
+		}
 	}
 
 	public void EvaluateSelf()
 	{
-		ActorBodyPart legLowerLeft = bodyParts.Find(x=>x.bodyPartType == BodyPartType.LegLeftLower); 
-		ActorBodyPart legLowerRight = bodyParts.Find(x=>x.bodyPartType == BodyPartType.LegRightLower); 
-		ActorBodyPart legUpperLeft = bodyParts.Find(x=>x.bodyPartType == BodyPartType.LegLeftUpper); 
-		ActorBodyPart legUpperRight = bodyParts.Find(x=>x.bodyPartType == BodyPartType.LegRightUpper); 
-		ActorBodyPart handLeft = bodyParts.Find(x=>x.bodyPartType == BodyPartType.ArmLeftHand); 
-		ActorBodyPart handRight = bodyParts.Find(x=>x.bodyPartType == BodyPartType.ArmRightHand); 
+		ActorBodyPart legLowerLeft = bodyParts.Find(x=>x.bodyPartType == BodyPartType.LegLeftLower && x.CanWalk()); 
+		ActorBodyPart legLowerRight = bodyParts.Find(x=>x.bodyPartType == BodyPartType.LegRightLower && x.CanWalk()); 
+		ActorBodyPart legUpperLeft = bodyParts.Find(x=>x.bodyPartType == BodyPartType.LegLeftUpper && x.CanWalk()); 
+		ActorBodyPart legUpperRight = bodyParts.Find(x=>x.bodyPartType == BodyPartType.LegRightUpper && x.CanWalk()); 
 		
 		canWalkNormal = legLowerLeft != null && legLowerRight != null;
+		canWalkHop = legLowerLeft != null || legLowerRight != null;
 		canWalkKneel = legUpperLeft != null && legUpperRight != null && legLowerLeft == null && legLowerRight == null;
-		if( handRight != null )
-		{
-			throwerType = BodyPartType.ArmRightHand;	
-		}
-		else if( handLeft != null )
-		{
-			throwerType = BodyPartType.ArmLeftHand;
-		}
-		else
-		{
-			throwerType = BodyPartType.None;
-		}	
 		if( canWalkNormal )
 		{
 			skeleton.transform.position = Vector3.zero;
+
 		}
 		else if( canWalkKneel )
 		{
 			skeleton.transform.position = 0.31f*Vector3.down;
+
 		}
 		else
 		{	

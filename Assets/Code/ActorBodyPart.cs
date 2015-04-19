@@ -88,7 +88,7 @@ public class ActorBodyPart : MonoBehaviour
 
 	public bool stateLock = false;
 	private GlueState glueState;
-	private PartState debugState;
+	public PartState debugState;
 
 	private Vector3 nextForce = Vector3.zero;
 
@@ -147,9 +147,18 @@ public class ActorBodyPart : MonoBehaviour
 	{
 		return machine.IsState(PartState.HELD);
 	}
+	public bool CanWeaponSelect()
+	{
+		return machine.IsState(PartState.ATTACHED);
+	}
 	public bool CanWeaponDeselect()
 	{
 		return machine.IsState(PartState.SELECTED) || machine.IsState(PartState.LAUNCH);
+	}
+
+	public bool CanWalk()
+	{
+		return machine.IsState(PartState.SELECTED) || machine.IsState(PartState.ATTACHED);
 	}
 
 	bool CanSwitch()
@@ -175,7 +184,7 @@ public class ActorBodyPart : MonoBehaviour
 		float deltaTime = Time.deltaTime;
 		if( colliderTimer.Tick(deltaTime) )
 		{
-			thisCollider.isTrigger = false;
+			SetLayerRecursive(LayerMask.NameToLayer("Projectile"));
 		}
 		if( expireTimer.Tick(deltaTime) )
 		{
@@ -185,6 +194,7 @@ public class ActorBodyPart : MonoBehaviour
 
 	public void Expire()
 	{
+		expireTimer.Pause(true);
 		GlueRecursive(GlueState.FREE);
 		SetStateRecursive(PartState.DORMANT);
 	}
@@ -195,9 +205,9 @@ public class ActorBodyPart : MonoBehaviour
 		if( !val )
 		{
 			bool? unlockResult = machine.SetFailedState();
-			if( unlockResult != null )
+			//if( unlockResult != null )
 			{
-				PartState st = (PartState)machine.GetActiveState();
+				//PartState st = (PartState)machine.GetActiveState();
 			}
 		}
 	}
@@ -215,6 +225,14 @@ public class ActorBodyPart : MonoBehaviour
 		if( childPart != null )
 		{
 			childPart.SetStateRecursive(nextState);
+		}
+	}
+	public void SetLayerRecursive(LayerMask layer)
+	{
+		this.gameObject.layer = layer;
+		if( childPart != null )
+		{
+			childPart.SetLayerRecursive(layer);
 		}
 	}
 
@@ -245,6 +263,7 @@ public class ActorBodyPart : MonoBehaviour
 		ActorBodyPart debrisPart = debris.GetComponent<ActorBodyPart>();
 		//debrisPart.thisRenderer.material = new Material(thisRenderer.material);
 		debrisPart.thisRenderer.material.color = Color.green;
+		debrisPart.thisRigidbody.velocity = thisRigidbody.velocity;
 		//debrisPart.SetParent(thisTransform.parent);
 		Destroy(debrisPart);
 
@@ -283,19 +302,17 @@ public class ActorBodyPart : MonoBehaviour
 			case GlueState.LIMB: SetParent(limbParent); break;
 			case GlueState.FREE: 
 				SetParent(null); 
-				
 				break;
 		}
 		if(glueState == GlueState.FREE)
 		{
 			thisRigidbody.isKinematic = false;
-			thisCollider.isTrigger = false;
-			//colliderTimer = new BasicTimer(0.2f, false);
+			colliderTimer = new BasicTimer(0.2f, false);
 		}
 		else
 		{
 			thisRigidbody.isKinematic = true;
-			thisCollider.isTrigger = true;
+			this.gameObject.layer = LayerMask.NameToLayer("Limb");
 		}
 	}
 
@@ -338,13 +355,12 @@ public class ActorBodyPart : MonoBehaviour
 
 	void OnLaunch()
 	{
+		thisBody.Cycle();
 		Glue(GlueState.FREE);
 
 		//test
 		//thisTransform.position = thisTransform.position + Vector3.one*10f;
 		thisRigidbody.AddForce(nextForce);
-		
-		StateLock(true);
 		
 		expireTimer = new BasicTimer(1.5f, false);
 	}
@@ -389,9 +405,32 @@ public class ActorBodyPart : MonoBehaviour
 
 	public void OnCollisionEnter(Collision collision)
 	{
-		if( glueState == GlueState.LIMB || glueState == GlueState.FREE )
+		ActorBodyPart bodyPart = collision.collider.GetComponent<ActorBodyPart>();
+		if( bodyPart != null )
 		{
-			Expire();
+			if( bodyPart.thisBody == thisBody )
+			{
+				return;	
+			}
+			else
+			{
+				bodyPart.HitBy(this);
+				this.HitBy(bodyPart);
+			}
 		}
+		else
+		{
+			//wall or ground?
+			if( glueState == GlueState.LIMB || glueState == GlueState.FREE )
+			{
+				Expire();
+			}
+		}
+	}
+
+	public void HitBy(ActorBodyPart other)
+	{
+		Debug.Log(this+"hit by "+other+" glueState"+glueState);
+		Expire();
 	}
 }

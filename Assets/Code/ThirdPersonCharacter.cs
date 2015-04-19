@@ -62,13 +62,17 @@ namespace UnityStandardAssets.Characters.ThirdPerson
 
 			if( !thisActorBody.canWalkNormal )
 			{
-				if( !thisActorBody.canWalkKneel )
+				if( thisActorBody.canWalkHop )
 				{
-					move *= 0.01f;		
+					move *= 0.3f;		
+				}
+				else if( thisActorBody.canWalkKneel )
+				{
+					move *= 0.2f;		
 				}
 				else
 				{
-					move *= 0.2f;
+					move *= 0.05f;
 				}
 			}
 

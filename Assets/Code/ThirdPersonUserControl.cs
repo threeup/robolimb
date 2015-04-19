@@ -7,6 +7,7 @@ namespace UnityStandardAssets.Characters.ThirdPerson
     [RequireComponent(typeof (ThirdPersonCharacter))]
     public class ThirdPersonUserControl : MonoBehaviour
     {
+        public bool isAI = false;
         public Actor thisActor;
         private ThirdPersonCharacter thisCharacter; // A reference to the ThirdPersonCharacter on the object
         private Transform thisCam;                  // A reference to the main camera in the scenes transform
@@ -34,6 +35,15 @@ namespace UnityStandardAssets.Characters.ThirdPerson
 
             // get the third person character ( this should never be null due to require component )
             thisCharacter = GetComponent<ThirdPersonCharacter>();
+
+            if( isAI )
+            {
+                NavMeshAgent naver = GetComponent<NavMeshAgent>();
+                naver.enabled = true;
+                AICharacterControl aier = GetComponent<AICharacterControl>();
+                aier.enabled = true;
+                this.enabled = false;
+            }
         }
 
 
@@ -43,8 +53,13 @@ namespace UnityStandardAssets.Characters.ThirdPerson
             {
                 doJump = CrossPlatformInputManager.GetButtonDown("Jump");
             }
-            doThrow = CrossPlatformInputManager.GetButtonDown("Fire1");
-            doCycle = CrossPlatformInputManager.GetButtonDown("Fire2");
+            bool shouldThrow = CrossPlatformInputManager.GetButton("Fire1");
+            bool shouldCycle = CrossPlatformInputManager.GetButton("Fire2");
+            if( doThrow != shouldThrow)
+            {
+                doThrow = shouldThrow;
+            }
+            doCycle = shouldCycle;
             thisActor.Throwing(doThrow, doCycle);
         }
 

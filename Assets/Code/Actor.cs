@@ -42,20 +42,20 @@ public class Actor : MonoBehaviour
 			case ThrowPhase.NONE:
 				if( body.CanThrowStart() )
 				{
-					throwTimer = new BasicTimer(1f);
+					throwTimer = new BasicTimer(1f, false);
 					body.AlignToThrower();
 					throwPhase = ThrowPhase.ALIGN;
 				}
 				break;
 			case ThrowPhase.ALIGN: 
-				throwTimer = new BasicTimer(5f);
+				throwTimer = new BasicTimer(20f, false);
 				body.Animate(); 
 				throwPhase = ThrowPhase.CHARGE;
 				break;
 			case ThrowPhase.CHARGE: 
 				if( body.CanThrowFinish() )
 				{
-					body.Launch(throwTimer.Percent);
+					body.Launch(1f-throwTimer.Percent);
 					throwTimer.Pause(true);
 					throwPhase = ThrowPhase.NONE;
 				}
