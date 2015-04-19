@@ -10,12 +10,13 @@ GameObject:
   - 4: {fileID: 430678}
   - 33: {fileID: 3355624}
   - 23: {fileID: 2346764}
+  - 64: {fileID: 6412850}
   m_Layer: 0
   m_Name: RampSE.001
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
+  m_StaticEditorFlags: 8
   m_IsActive: 1
 --- !u!1 &155580
 GameObject:
@@ -27,12 +28,13 @@ GameObject:
   - 4: {fileID: 494448}
   - 33: {fileID: 3395784}
   - 23: {fileID: 2313252}
+  - 64: {fileID: 6497136}
   m_Layer: 0
   m_Name: RampMiddle
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
+  m_StaticEditorFlags: 8
   m_IsActive: 1
 --- !u!1 &180192
 GameObject:
@@ -44,12 +46,13 @@ GameObject:
   - 4: {fileID: 442520}
   - 33: {fileID: 3382512}
   - 23: {fileID: 2380760}
+  - 64: {fileID: 6404722}
   m_Layer: 0
   m_Name: RampSE
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
+  m_StaticEditorFlags: 8
   m_IsActive: 1
 --- !u!1 &187264
 GameObject:
@@ -101,8 +104,8 @@ Transform:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 192348}
-  m_LocalRotation: {x: 0, y: .707106829, z: 0, w: .707106709}
-  m_LocalPosition: {x: -8.89999962, y: 1.51999998, z: -10.0900002}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -8.60000038, y: 1, z: 7.46000004}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 494448}
@@ -239,6 +242,42 @@ MeshFilter:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 155580}
+  m_Mesh: {fileID: 4300004, guid: 4baadba7720662a4a8558e3817e7c0f2, type: 3}
+--- !u!64 &6404722
+MeshCollider:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 180192}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Convex: 0
+  m_Mesh: {fileID: 4300000, guid: 4baadba7720662a4a8558e3817e7c0f2, type: 3}
+--- !u!64 &6412850
+MeshCollider:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 150790}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Convex: 0
+  m_Mesh: {fileID: 4300006, guid: 4baadba7720662a4a8558e3817e7c0f2, type: 3}
+--- !u!64 &6497136
+MeshCollider:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 155580}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Convex: 0
   m_Mesh: {fileID: 4300004, guid: 4baadba7720662a4a8558e3817e7c0f2, type: 3}
 --- !u!114 &11415528
 MonoBehaviour:

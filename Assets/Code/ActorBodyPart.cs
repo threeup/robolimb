@@ -204,7 +204,7 @@ public class ActorBodyPart : MonoBehaviour
 		stateLock = val;
 		if( !val )
 		{
-			bool? unlockResult = machine.RetryFailedState();
+			machine.RetryFailedState();
 			//if( unlockResult != null )
 			{
 				//PartState st = (PartState)machine.GetActiveState();

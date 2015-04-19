@@ -99,13 +99,15 @@ public class Game : MonoBehaviour
 		{
 			if(alivePC < desiredPC)
 			{
-				Actor actor = spawner.Spawn(false);
-				autoCam.SetTarget(actor.transform);
+				spawner.spawnType = SpawnType.ACTOR_PC;
+				GameObject go = spawner.Spawn();
+				autoCam.SetTarget(go.transform);
 				alivePC++;
 			}
 			else
 			{
-				spawner.Spawn(true);
+				spawner.spawnType = SpawnType.ACTOR_AI;
+				spawner.Spawn();
 			}
 		}
 	}

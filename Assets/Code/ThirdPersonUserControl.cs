@@ -37,9 +37,9 @@ namespace UnityStandardAssets.Characters.ThirdPerson
             thisCharacter = GetComponent<ThirdPersonCharacter>();
         }
 
-        public void Spawn(bool isAI)
+        public void Spawn(bool isPC)
         {
-            this.isAI = isAI;
+            this.isAI = !isPC;
             NavMeshAgent naver = GetComponent<NavMeshAgent>();
             AICharacterControl aier = GetComponent<AICharacterControl>();
             if( isAI )
