@@ -132,7 +132,7 @@ namespace GumboLib
 			return SetState(previousState);
 		}
 
-		public bool? SetFailedState()
+		public bool? RetryFailedState()
 		{
 			if( failedState == null )
 			{

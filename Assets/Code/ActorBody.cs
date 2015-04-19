@@ -175,46 +175,30 @@ public class ActorBody : MonoBehaviour
 			if(weaponRight)
 			{
 				throwerType = BodyPartType.ArmLeftHand;
-				thrower = bodyParts.Find(x=>x.bodyPartType == throwerType);
-				if( thrower != null && !thrower.CanThrowStart() )
-				{
-					thrower = null;
-					throwerType = BodyPartType.None;
-				}
+				thrower = bodyParts.Find(x=>x.bodyPartType == throwerType && thrower.CanThrowStart());
 			}
 			else if(weaponLeft)
 			{
 				throwerType = BodyPartType.ArmRightHand;	
-				thrower = bodyParts.Find(x=>x.bodyPartType == throwerType);
-				if( thrower != null && !thrower.CanThrowStart() )
-				{
-					thrower = null;
-					throwerType = BodyPartType.None;
-				}
+				thrower = bodyParts.Find(x=>x.bodyPartType == throwerType && thrower.CanThrowStart());
 			}
 			else
 			{
 				if( thrower == null )
 				{
 					throwerType = BodyPartType.ArmRightHand;
-					thrower = bodyParts.Find(x=>x.bodyPartType == throwerType);
-					if( thrower != null && !thrower.CanThrowStart() )
-					{
-						thrower = null;
-						throwerType = BodyPartType.None;
-					}
+					thrower = bodyParts.Find(x=>x.bodyPartType == throwerType && thrower.CanThrowStart());
 				}
 				if( thrower == null )
 				{
 					throwerType = BodyPartType.ArmLeftHand;
-					thrower = bodyParts.Find(x=>x.bodyPartType == throwerType);
-					if( thrower != null && !thrower.CanThrowStart() )
-					{
-						thrower = null;
-						throwerType = BodyPartType.None;
-					}
+					thrower = bodyParts.Find(x=>x.bodyPartType == throwerType && thrower.CanThrowStart());
 				}
 			}
+		}
+		if( thrower = null)
+		{
+			throwerType = BodyPartType.None;
 		}
 	}
 	

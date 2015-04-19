@@ -35,14 +35,24 @@ namespace UnityStandardAssets.Characters.ThirdPerson
 
             // get the third person character ( this should never be null due to require component )
             thisCharacter = GetComponent<ThirdPersonCharacter>();
+        }
 
+        public void Spawn(bool isAI)
+        {
+            this.isAI = isAI;
+            NavMeshAgent naver = GetComponent<NavMeshAgent>();
+            AICharacterControl aier = GetComponent<AICharacterControl>();
             if( isAI )
             {
-                NavMeshAgent naver = GetComponent<NavMeshAgent>();
-                naver.enabled = true;
-                AICharacterControl aier = GetComponent<AICharacterControl>();
+                naver.enabled = true;                
                 aier.enabled = true;
                 this.enabled = false;
+            }
+            else
+            {
+                naver.enabled = false;                
+                aier.enabled = false;
+                this.enabled = true;
             }
         }
 
