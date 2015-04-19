@@ -38,10 +38,24 @@ public enum PartState
 	ALIGNING,
 	ANIMATING,
 	HELD,
-	LAUNCH,
 	GLUED,
+	LAUNCH,
 	DORMANT,
 	GROWING,
+}
+
+// upper arm
+// selected, aligning, held, launch, dormant
+// lower arm
+// attached, glued, dormant
+
+public enum GlueState
+{
+	HOME,
+	SKELETON,
+	HAND,
+	LIMB,
+	FREE,
 }
 
 public class ActorBodyPart : MonoBehaviour 
@@ -58,11 +72,12 @@ public class ActorBodyPart : MonoBehaviour
 	public ActorBodyPart parentPart;
 	public ActorBodyPart childPart;
 
-	private Transform originalParent;
+	private Transform bodyParent = null;
+	public Transform handParent = null;
+	private Transform limbParent = null;
 	private Vector3 originalPos;
 	private Quaternion originalRot;
 	private Vector3 originalScale;
-	public Transform nextParent;
 
 	private BasicTimer colliderTimer = new BasicTimer(0f);
 	private BasicTimer expireTimer = new BasicTimer(0f);
@@ -72,6 +87,7 @@ public class ActorBodyPart : MonoBehaviour
 	public int depth = -1;
 
 	public bool stateLock = false;
+	private GlueState glueState;
 	private PartState debugState;
 
 	private Vector3 nextForce = Vector3.zero;
@@ -89,9 +105,11 @@ public class ActorBodyPart : MonoBehaviour
 		machine[(int)PartState.ANIMATING].CanEnter = CanSwitch;
 		machine[(int)PartState.HELD].OnEnter = OnHeld;
 		machine[(int)PartState.HELD].CanEnter = CanSwitch;
+		machine[(int)PartState.GLUED].OnEnter = OnGlued;
+		machine[(int)PartState.GLUED].CanEnter = CanSwitch;
 		machine[(int)PartState.LAUNCH].OnEnter = OnLaunch;
 		machine[(int)PartState.LAUNCH].CanEnter = CanSwitch;
-		machine[(int)PartState.DORMANT].OnEnter = OnExpire;
+		machine[(int)PartState.DORMANT].OnEnter = OnDormant;
 		machine[(int)PartState.DORMANT].CanEnter = CanSwitch;
 		machine[(int)PartState.GROWING].OnEnter = OnGrow;
 		machine[(int)PartState.GROWING].CanEnter = CanSwitch;
@@ -99,7 +117,9 @@ public class ActorBodyPart : MonoBehaviour
 		thisTransform = this.transform;
 		thisRenderer = this.GetComponent<Renderer>();
 		thisBody = this.GetComponentInParent<ActorBody>();
-		originalParent = thisTransform.parent;
+		bodyParent = thisTransform.parent;
+		handParent = null;
+		limbParent = parentPart != null ? parentPart.transform : null;
 		originalPos = thisTransform.localPosition;
 		originalRot = thisTransform.localRotation;
 		originalScale = thisTransform.localScale;
@@ -155,13 +175,18 @@ public class ActorBodyPart : MonoBehaviour
 		float deltaTime = Time.deltaTime;
 		if( colliderTimer.Tick(deltaTime) )
 		{
-			thisCollider.enabled = true;
-			StateLock(false);
+			thisCollider.isTrigger = false;
 		}
 		if( expireTimer.Tick(deltaTime) )
 		{
-			machine.SetState(PartState.DORMANT);
+			Expire();
 		}
+	}
+
+	public void Expire()
+	{
+		GlueRecursive(GlueState.FREE);
+		SetStateRecursive(PartState.DORMANT);
 	}
 
 	void StateLock(bool val)
@@ -175,7 +200,22 @@ public class ActorBodyPart : MonoBehaviour
 				PartState st = (PartState)machine.GetActiveState();
 			}
 		}
-		
+	}
+
+	public void SetStateChildren(PartState nextState)
+	{
+		if( childPart != null )
+		{
+			childPart.SetStateRecursive(nextState);
+		}
+	}
+	public void SetStateRecursive(PartState nextState)
+	{
+		machine.SetState(nextState);
+		if( childPart != null )
+		{
+			childPart.SetStateRecursive(nextState);
+		}
 	}
 
 	void OnAttach()
@@ -185,10 +225,11 @@ public class ActorBodyPart : MonoBehaviour
 
 	void OnAlign()
 	{
-		Glue(true);
-		SetParent(thisBody.skeleton.transform);
+		Glue(GlueState.SKELETON);
+		SetStateChildren(PartState.GLUED);
+
 		StateLock(true);
-		thisTransform.DOMove(nextParent.position, 1).OnComplete(SetStateHeld);
+		thisTransform.DOMove(handParent.position, 1).OnComplete(SetStateHeld);
 	}
 
 	void SetStateHeld()
@@ -197,10 +238,8 @@ public class ActorBodyPart : MonoBehaviour
 		machine.SetState(PartState.HELD);
 	}
 
-	void OnExpire()
+	void OnDormant()
 	{
-		Glue(false);
-
 		GameObject debris = Instantiate(this.gameObject, thisTransform.position, thisTransform.rotation) as GameObject;
 		debris.transform.localScale = originalScale;
 		ActorBodyPart debrisPart = debris.GetComponent<ActorBodyPart>();
@@ -209,13 +248,11 @@ public class ActorBodyPart : MonoBehaviour
 		//debrisPart.SetParent(thisTransform.parent);
 		Destroy(debrisPart);
 
-		SetParent(originalParent);
+		Glue(GlueState.HOME);
 		thisTransform.localPosition = originalPos;
 		thisTransform.localRotation = originalRot;
 		thisTransform.localScale = 0.0001f*Vector3.one;
-		thisCollider.enabled = false;
-		thisRigidbody.isKinematic = true;
-
+		
 		thisBody.Dormant(this);
 		
 	}
@@ -231,29 +268,56 @@ public class ActorBodyPart : MonoBehaviour
 		thisTransform.DOScale(originalScale, 1f).OnComplete(Reregister);	
 	}
 
-	public void Glue(bool val)
+	public void Glue(GlueState nextGlueState)
 	{
-		if( childPart != null ) 
+		if( glueState == nextGlueState )
 		{
-			if( val )
-			{
-				childPart.SetParent(this.transform);
-				childPart.machine.SetState(PartState.GLUED);
-			}
-			else
-			{
-				childPart.SetParent(null);	
-				childPart.machine.SetState(PartState.DORMANT);
-			}
-			childPart.Glue(val);
+			return;
+		}
+		glueState = nextGlueState;
+		switch(glueState)
+		{
+			case GlueState.HOME: SetParent(bodyParent); break;
+			case GlueState.SKELETON: SetParent(thisBody.skeleton.transform); break;
+			case GlueState.HAND: SetParent(handParent); break;
+			case GlueState.LIMB: SetParent(limbParent); break;
+			case GlueState.FREE: 
+				SetParent(null); 
+				
+				break;
+		}
+		if(glueState == GlueState.FREE)
+		{
+			thisRigidbody.isKinematic = false;
+			thisCollider.isTrigger = false;
+			//colliderTimer = new BasicTimer(0.2f, false);
+		}
+		else
+		{
+			thisRigidbody.isKinematic = true;
+			thisCollider.isTrigger = true;
+		}
+	}
+
+	public void GlueRecursive(GlueState nextGlueState)
+	{
+		Glue(nextGlueState);
+		if(childPart != null)
+		{
+			childPart.GlueRecursive(nextGlueState);
 		}
 	}
 
 	void OnHeld()
 	{
-		SetParent(nextParent);
+		Glue(GlueState.HAND);
 		StateLock(true);
 		thisTransform.DOLocalMove(Vector3.zero, 0.2f).OnComplete(Unlock);
+	}
+
+	void OnGlued()
+	{
+		Glue(GlueState.LIMB);
 	}
 
 	void Unlock()
@@ -274,16 +338,14 @@ public class ActorBodyPart : MonoBehaviour
 
 	void OnLaunch()
 	{
-		SetParent(null);
+		Glue(GlueState.FREE);
 
 		//test
 		//thisTransform.position = thisTransform.position + Vector3.one*10f;
-		thisRigidbody.isKinematic = false;
 		thisRigidbody.AddForce(nextForce);
 		
 		StateLock(true);
-		thisCollider.enabled = false;
-		colliderTimer = new BasicTimer(0.2f, false);
+		
 		expireTimer = new BasicTimer(1.5f, false);
 	}
 
@@ -323,5 +385,13 @@ public class ActorBodyPart : MonoBehaviour
 		//PartState lastState = (PartState)prevIdx;
 		//Debug.Log("Change"+lastState+" "+debugState);
 		thisRenderer.material.color = color;
+	}
+
+	public void OnCollisionEnter(Collision collision)
+	{
+		if( glueState == GlueState.LIMB || glueState == GlueState.FREE )
+		{
+			Expire();
+		}
 	}
 }

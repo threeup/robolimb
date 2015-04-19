@@ -7,6 +7,8 @@ namespace UnityStandardAssets.Characters.ThirdPerson
 	[RequireComponent(typeof(Animator))]
 	public class ThirdPersonCharacter : MonoBehaviour
 	{
+		public LayerMask characterMask;
+
 		[SerializeField] float movingTurnSpeed = 360;
 		[SerializeField] float stationaryTurnSpeed = 180;
 		[SerializeField] float doJumpPower = 12f;
@@ -17,6 +19,7 @@ namespace UnityStandardAssets.Characters.ThirdPerson
 		[SerializeField] float groundCheckDistance = 0.1f;
 
 		ActorBody thisActorBody;
+
 
 		Rigidbody thisRigidbody;
 		Animator thisAnimator;
@@ -106,7 +109,7 @@ namespace UnityStandardAssets.Characters.ThirdPerson
 			{
 				Ray crouchRay = new Ray(thisRigidbody.position + Vector3.up * thisCapsule.radius * k_Half, Vector3.up);
 				float crouchRayLength = capsuleHeight - thisCapsule.radius * k_Half;
-				if (Physics.SphereCast(crouchRay, thisCapsule.radius * k_Half, crouchRayLength))
+				if (Physics.SphereCast(crouchRay, thisCapsule.radius * k_Half, crouchRayLength, characterMask))
 				{
 					isCrouching = true;
 					return;
@@ -124,7 +127,7 @@ namespace UnityStandardAssets.Characters.ThirdPerson
 			{
 				Ray crouchRay = new Ray(thisRigidbody.position + Vector3.up * thisCapsule.radius * k_Half, Vector3.up);
 				float crouchRayLength = capsuleHeight - thisCapsule.radius * k_Half;
-				if (Physics.SphereCast(crouchRay, thisCapsule.radius * k_Half, crouchRayLength))
+				if (Physics.SphereCast(crouchRay, thisCapsule.radius * k_Half, crouchRayLength, characterMask))
 				{
 					isCrouching = true;
 				}
@@ -225,7 +228,7 @@ namespace UnityStandardAssets.Characters.ThirdPerson
 #endif
 			// 0.1f is a small offset to start the ray from inside the character
 			// it is also good to note that the transform position in the sample assets is at the base of the character
-			if (Physics.Raycast(transform.position + (Vector3.up * 0.1f), Vector3.down, out hitInfo, groundCheckDistance))
+			if (Physics.Raycast(transform.position + (Vector3.up * 0.1f), Vector3.down, out hitInfo, groundCheckDistance, characterMask))
 			{
 				groundNormal = hitInfo.normal;
 				isGrounded = true;

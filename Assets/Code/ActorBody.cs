@@ -76,7 +76,7 @@ public class ActorBody : MonoBehaviour
 	{
 		GetThrower();
 		GetWeapon();
-		weapon.nextParent = thrower.transform;
+		weapon.handParent = thrower.transform;
 		
 		thrower.machine.SetState(PartState.GRABBING);
 		weapon.machine.SetState(PartState.ALIGNING);
