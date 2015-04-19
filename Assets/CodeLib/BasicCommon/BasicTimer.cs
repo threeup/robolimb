@@ -16,6 +16,10 @@ namespace BasicCommon
 
         private bool isLooping = false;
         private bool isPaused = false;
+        public bool IsPaused { get { return isPaused; } }
+
+        public float Percent { get { return timeVal / duration; } }
+
         public BasicTimer(float duration, bool isLooping = true)
         {
             this.timeVal = duration;
