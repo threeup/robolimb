@@ -30,7 +30,7 @@ public class Actor : MonoBehaviour
 	
 	}
 
-	public void Spawn(ActorTeam team)
+	public void Spawn(ActorTeam team, bool isPC)
 	{
 		this.team = team;
 		switch(team)
@@ -39,6 +39,7 @@ public class Actor : MonoBehaviour
 			case ActorTeam.BLUE: body.Spawn(Color.blue); break;
 			case ActorTeam.NONE: body.Spawn(Color.grey); break;
 		}
+		aimer.canDraw = isPC;
 		Game.Instance.Register(this);
 	}
 	

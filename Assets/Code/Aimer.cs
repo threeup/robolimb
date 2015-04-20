@@ -10,6 +10,7 @@ public class Aimer : MonoBehaviour
 	public List<GameObject> aimChildren;
 	public float spacing = 1f;
 	bool aimEnabled = true;
+	public bool canDraw = true;
 
 	public GameObject aimTarget;
 
@@ -66,10 +67,13 @@ public class Aimer : MonoBehaviour
 			return;
 		}
 		aimEnabled = val;
-		for(int i=0; i<aimChildren.Count; ++i)
+		if( val == false || canDraw )
 		{
-			aimChildren[i].SetActive(val);
-		}	
+			for(int i=0; i<aimChildren.Count; ++i)
+			{
+				aimChildren[i].SetActive(val);
+			}	
+		}
 	}
 
 	public void SetAimAmount(float val)

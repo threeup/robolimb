@@ -62,11 +62,11 @@ public class Spawner : MonoBehaviour
 		{
 			case SpawnType.ACTOR_PC:
 				user.Spawn(true);
-				actor.Spawn(team);
+				actor.Spawn(team, true);
 				break;
 			case SpawnType.ACTOR_AI:
 				user.Spawn(false);
-				actor.Spawn(team);
+				actor.Spawn(team, false);
 				break;
 			default:
 			case SpawnType.ITEM:
