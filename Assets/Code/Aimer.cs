@@ -43,9 +43,6 @@ public class Aimer : MonoBehaviour
 				Vector3 forward = thisActor.transform.forward;
             	Vector3 toOther = (otherActor.transform.position - thisActor.transform.position).normalized;
                 float dot = Vector3.Dot(forward, toOther);
-				Debug.DrawRay(thisActor.transform.position, forward*10f, Color.white, 1f);
-				Debug.DrawRay(thisActor.transform.position, toOther*10f, Color.green, 1f);
-				Debug.Log("dot to"+otherActor+" "+dot+" "+toOther);
                 if( dot > bestDot )
                 {
                     bestDot = dot;
@@ -56,7 +53,6 @@ public class Aimer : MonoBehaviour
         if( bestActor != null && aimTarget != bestActor.gameObject)
         {
             aimTarget = bestActor.gameObject;
-            Debug.Log("new aim target");
         }
 	}
 

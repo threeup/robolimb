@@ -29,31 +29,27 @@ public class Game : MonoBehaviour
 	public BasicMachine<GameState> machine;
 	public AutoCam autoCam;
 
-
+	public GameObject canvas;
 
 	void Awake()
 	{
 		Instance = this;
 		machine = new BasicMachine<GameState>();
 		machine.Initialize(typeof(GameState));
+		machine[(int)GameState.INTRO].OnEnter = OnIntro;
+		machine[(int)GameState.INTRO].OnExit = OnIntroExit;
 		machine[(int)GameState.SPAWNING].OnEnter = OnSpawn;
 		machine[(int)GameState.SPAWNING].CanEnter = CanSpawn;
+		machine[(int)GameState.ACTION].CanEnter = CanAction;
 	}
 
 
 
 	public void Update()
 	{
-		switch(machine.GetActiveState())
+		if( machine.failedState != null)
 		{
-			case (int)GameState.INTRO:
-				if( Input.GetKey(KeyCode.Space) )
-				{
-					machine.SetState(GameState.SPAWNING);
-				}
-				break;
-			default:
-				break;
+			machine.RetryFailedState();
 		}
 	}
 
@@ -64,8 +60,11 @@ public class Game : MonoBehaviour
         bool acceptingInput = Time.time - lastInput > 0.35f;
         if( acceptingInput )
         {
+        	GameState currentState = (GameState)machine.GetActiveState();
 	        bool speedDown = Input.GetKey(KeyCode.F1);
 	        bool speedUp = Input.GetKey(KeyCode.F2);
+	        bool kill = Input.GetKey(KeyCode.Escape);
+	        bool start = Input.GetKey(KeyCode.Space);
 	        float nextTimeScale = 0f;
 	        if( speedUp )
 	        {
@@ -81,6 +80,18 @@ public class Game : MonoBehaviour
 	        	Time.timeScale = Mathf.Clamp(nextTimeScale, 0.2f, 3f);
 	        	lastInput = Time.time;
 	        	Debug.Log("nextTimeScale"+nextTimeScale);
+	        }
+	        if( start && currentState == GameState.INTRO)
+	        {
+	        	machine.SetState(GameState.SPAWNING);
+	        }
+	        if( kill && currentState == GameState.INTRO)
+	        {
+	        	Application.Quit();
+	        }
+	        if( kill && currentState == GameState.ACTION)
+	        {
+	        	machine.SetState(GameState.INTRO);
 	        }
 	    }
     }
@@ -137,6 +148,31 @@ public class Game : MonoBehaviour
 		return spawners.Count > 3;
 	}
 
+	bool CanAction()
+	{
+		return livingActors.Count > 1;
+	}
+
+	public void OnIntro()
+	{
+		canvas.SetActive(true);
+		foreach(Actor actor in livingActors)
+		{
+			Destroy(actor.gameObject);
+		}
+		livingActors.Clear();
+		foreach(Item item in livingItems)
+		{
+			Destroy(item.gameObject);
+		}
+		livingItems.Clear();
+	}
+
+	public void OnIntroExit()
+	{
+		canvas.SetActive(false);
+	}
+
 	public void OnSpawn()
 	{
 		int alivePC = 0;
@@ -170,5 +206,6 @@ public class Game : MonoBehaviour
 				}
 			}
 		}
+		machine.SetState(GameState.ACTION);
 	}
 }
