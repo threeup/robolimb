@@ -79,8 +79,9 @@ public class ActorBodyPart : MonoBehaviour
 	private Quaternion originalRot;
 	private Vector3 originalScale;
 
-	private BasicTimer colliderTimer = new BasicTimer(0f);
+	//private BasicTimer colliderTimer = new BasicTimer(0f);
 	private BasicTimer expireTimer = new BasicTimer(0f);
+	private bool waitingForProjectile = false;
 
 	public BasicMachine<PartState> machine;
 
@@ -91,7 +92,7 @@ public class ActorBodyPart : MonoBehaviour
 	public PartState debugState;
 
 	public float growSpeed = 1f;
-	float defaultGrowTime = 0.1f;
+	float defaultGrowTime = 5f;
 
 	private Vector3 nextForce = Vector3.zero;
 
@@ -187,10 +188,15 @@ public class ActorBodyPart : MonoBehaviour
 	public void Update()
 	{
 		float deltaTime = Time.deltaTime;
-		if( colliderTimer.Tick(deltaTime) )
+		if( waitingForProjectile )
 		{
-			SetLayerRecursive(LayerMask.NameToLayer("Projectile"));
+			Vector3 diff = this.transform.position - thisBody.skeleton.transform.position;
+			if( Mathf.Abs(diff.x) + Mathf.Abs(diff.z) > 0.5f )
+			{
+				SetLayerRecursive(LayerMask.NameToLayer("Projectile"));
+			}
 		}
+		
 		if( expireTimer.Tick(deltaTime) )
 		{
 			Expire();
@@ -235,6 +241,7 @@ public class ActorBodyPart : MonoBehaviour
 	public void SetLayerRecursive(LayerMask layer)
 	{
 		this.gameObject.layer = layer;
+		SetColor(thisBody.mainColor);
 		if( childPart != null )
 		{
 			childPart.SetLayerRecursive(layer);
@@ -305,6 +312,9 @@ public class ActorBodyPart : MonoBehaviour
 
 	void OnGrow()
 	{
+		Glue(GlueState.HOME);
+		thisTransform.localPosition = originalPos;
+		thisTransform.localRotation = originalRot;
 		StateLock(true);
 		thisTransform.DOScale(originalScale, defaultGrowTime/growSpeed).OnComplete(Reregister);	
 	}
@@ -332,7 +342,7 @@ public class ActorBodyPart : MonoBehaviour
 		if(glueState == GlueState.FREE)
 		{
 			thisRigidbody.isKinematic = false;
-			colliderTimer = new BasicTimer(0.2f, false);
+			waitingForProjectile = true;
 		}
 		else
 		{
