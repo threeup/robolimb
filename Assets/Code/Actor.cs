@@ -56,12 +56,23 @@ public class Actor : MonoBehaviour
 			{
 				aimer.SetEnabled(true);
 				aimer.SetAimAmount(1f-throwTimer.Percent);
+				if( aimer.aimTarget != null )
+				{
+					aimer.transform.LookAt(aimer.aimTarget.transform, Vector3.up);
+				}
 			}
 			else
 			{
 				aimer.SetEnabled(false);
 			}
 		}
+	}
+
+	public Vector3 ThrowVector()
+	{
+		Vector3 throwVec = 0.7f*aimer.transform.forward+0.3f*this.transform.up;
+		return throwVec.normalized;
+
 	}
 
 	public void GoSuper()
@@ -86,7 +97,7 @@ public class Actor : MonoBehaviour
 				}
 				break;
 			case ThrowPhase.ALIGN: 
-				throwTimer = new BasicTimer(20f, false);
+				throwTimer = new BasicTimer(6f, false);
 				body.Animate(); 
 				throwPhase = ThrowPhase.CHARGE;
 				break;

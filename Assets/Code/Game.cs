@@ -96,6 +96,7 @@ public class Game : MonoBehaviour
 	}
     public void Register(Actor actor)
 	{
+		actor.name = "Actor"+GetNextUID();
 		if( !livingActors.Contains(actor) )
 		{
 			livingActors.Add(actor);
@@ -123,6 +124,13 @@ public class Game : MonoBehaviour
 		}
 	}
 
+	static int nextUID = 1;
+	int GetNextUID()
+	{
+		int result = nextUID++;
+		return result;
+	}
+
 
 	bool CanSpawn()
 	{
@@ -132,7 +140,9 @@ public class Game : MonoBehaviour
 	public void OnSpawn()
 	{
 		int alivePC = 0;
+		int aliveAI = 0;
 		int desiredPC = 1;
+		int desiredAI = 5;
 		foreach(Spawner spawner in spawners)
 		{
 			if( spawner.selfSpawn )
@@ -150,10 +160,14 @@ public class Game : MonoBehaviour
 					alivePC++;
 				}
 			}
-			else
+			else if(aliveAI < desiredAI)
 			{
-				//spawner.spawnType = SpawnType.ACTOR_AI;
-				//go = spawner.Spawn();
+				spawner.spawnType = SpawnType.ACTOR_AI;
+				go = spawner.Spawn();
+				if( go != null )
+				{
+					aliveAI++;
+				}
 			}
 		}
 	}

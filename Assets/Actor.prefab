@@ -1864,7 +1864,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 136382}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: .430000007, y: 0, z: 0}
   m_LocalScale: {x: .200000003, y: .200000003, z: .200000003}
   m_Children: []
   m_Father: {fileID: 467518}
@@ -2195,7 +2195,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 186520}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -1.7995621, y: -4.7203556e-20, z: .00212585903}
+  m_LocalPosition: {x: 7.9963479, y: 1.99999976, z: -8.39956188}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 486428}
@@ -2474,7 +2474,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 134608}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 1.70000005, y: 0, z: 0}
   m_LocalScale: {x: .200000003, y: .200000003, z: .200000003}
   m_Children: []
   m_Father: {fileID: 467518}
@@ -2859,7 +2859,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 142380}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: .779999971, y: 0, z: 0}
   m_LocalScale: {x: .200000003, y: .200000003, z: .200000003}
   m_Children: []
   m_Father: {fileID: 467518}
@@ -2984,7 +2984,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 199150}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 1.23000002, y: 0, z: 0}
   m_LocalScale: {x: .200000003, y: .200000003, z: .200000003}
   m_Children: []
   m_Father: {fileID: 467518}
@@ -3178,7 +3178,7 @@ MeshRenderer:
   m_CastShadows: 1
   m_ReceiveShadows: 1
   m_Materials:
-  - {fileID: 0}
+  - {fileID: 2100000, guid: 8729fb7d8ae9f5d42aaba2180faf5a95, type: 2}
   m_SubsetIndices: 
   m_StaticBatchRoot: {fileID: 0}
   m_UseLightProbes: 1
@@ -3322,7 +3322,7 @@ MeshRenderer:
   m_CastShadows: 1
   m_ReceiveShadows: 1
   m_Materials:
-  - {fileID: 0}
+  - {fileID: 2100000, guid: 8729fb7d8ae9f5d42aaba2180faf5a95, type: 2}
   m_SubsetIndices: 
   m_StaticBatchRoot: {fileID: 0}
   m_UseLightProbes: 1
@@ -3442,7 +3442,7 @@ MeshRenderer:
   m_CastShadows: 1
   m_ReceiveShadows: 1
   m_Materials:
-  - {fileID: 0}
+  - {fileID: 2100000, guid: 8729fb7d8ae9f5d42aaba2180faf5a95, type: 2}
   m_SubsetIndices: 
   m_StaticBatchRoot: {fileID: 0}
   m_UseLightProbes: 1
@@ -3586,7 +3586,7 @@ MeshRenderer:
   m_CastShadows: 1
   m_ReceiveShadows: 1
   m_Materials:
-  - {fileID: 0}
+  - {fileID: 2100000, guid: 8729fb7d8ae9f5d42aaba2180faf5a95, type: 2}
   m_SubsetIndices: 
   m_StaticBatchRoot: {fileID: 0}
   m_UseLightProbes: 1
@@ -3706,7 +3706,7 @@ MeshRenderer:
   m_CastShadows: 1
   m_ReceiveShadows: 1
   m_Materials:
-  - {fileID: 0}
+  - {fileID: 2100000, guid: 8729fb7d8ae9f5d42aaba2180faf5a95, type: 2}
   m_SubsetIndices: 
   m_StaticBatchRoot: {fileID: 0}
   m_UseLightProbes: 1
@@ -4461,7 +4461,7 @@ MonoBehaviour:
   thisRenderer: {fileID: 0}
   thisRigidbody: {fileID: 5458404}
   thisCollider: {fileID: 6579570}
-  bodyPartType: 22
+  bodyPartType: 23
   parentPart: {fileID: 11495786}
   childPart: {fileID: 11402824}
   handParent: {fileID: 0}
@@ -4485,7 +4485,7 @@ MonoBehaviour:
   thisRenderer: {fileID: 0}
   thisRigidbody: {fileID: 5453592}
   thisCollider: {fileID: 6546632}
-  bodyPartType: 24
+  bodyPartType: 25
   parentPart: {fileID: 11400556}
   childPart: {fileID: 11410842}
   handParent: {fileID: 0}
@@ -4561,7 +4561,7 @@ MonoBehaviour:
   thisRenderer: {fileID: 0}
   thisRigidbody: {fileID: 5454862}
   thisCollider: {fileID: 6550334}
-  bodyPartType: 26
+  bodyPartType: 27
   parentPart: {fileID: 11402824}
   childPart: {fileID: 0}
   handParent: {fileID: 0}
@@ -4674,10 +4674,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 81bdb48dfe5b1844e81d909e2e836053, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  thisActor: {fileID: 0}
+  thisActor: {fileID: 11422016}
   thisAnimator: {fileID: 9520338}
   bodyParts: []
-  mainColor: {r: 0, g: 0, b: 0, a: 0}
+  mainColor: {r: 0, g: 1, b: .751724243, a: 0}
   superTimer:
     timeVal: 0
     duration: 0
@@ -4729,7 +4729,7 @@ MonoBehaviour:
   thisRenderer: {fileID: 0}
   thisRigidbody: {fileID: 5418818}
   thisCollider: {fileID: 6506504}
-  bodyPartType: 23
+  bodyPartType: 22
   parentPart: {fileID: 11499842}
   childPart: {fileID: 11470092}
   handParent: {fileID: 0}
@@ -4753,7 +4753,7 @@ MonoBehaviour:
   thisRenderer: {fileID: 0}
   thisRigidbody: {fileID: 5406432}
   thisCollider: {fileID: 6547690}
-  bodyPartType: 27
+  bodyPartType: 26
   parentPart: {fileID: 11470092}
   childPart: {fileID: 0}
   handParent: {fileID: 0}
@@ -4772,6 +4772,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 94ce4b4eef376034897f888fb0a1a8ae, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  thisActor: {fileID: 11422016}
   aimChildren:
   - {fileID: 164212}
   - {fileID: 136382}
@@ -4779,6 +4780,7 @@ MonoBehaviour:
   - {fileID: 199150}
   - {fileID: 134608}
   spacing: 1
+  aimTarget: {fileID: 0}
 --- !u!114 &11454470
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -4880,7 +4882,7 @@ MonoBehaviour:
   thisRenderer: {fileID: 0}
   thisRigidbody: {fileID: 5422138}
   thisCollider: {fileID: 6519268}
-  bodyPartType: 25
+  bodyPartType: 24
   parentPart: {fileID: 11438992}
   childPart: {fileID: 11439784}
   handParent: {fileID: 0}
@@ -5022,7 +5024,7 @@ MonoBehaviour:
   thisRenderer: {fileID: 0}
   thisRigidbody: {fileID: 5401802}
   thisCollider: {fileID: 6590454}
-  bodyPartType: 20
+  bodyPartType: 21
   parentPart: {fileID: 0}
   childPart: {fileID: 11400556}
   handParent: {fileID: 0}

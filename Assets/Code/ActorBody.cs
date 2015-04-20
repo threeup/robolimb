@@ -10,17 +10,17 @@ public class ActorBody : MonoBehaviour
 	public Actor thisActor;
 	public Animator thisAnimator;
 	public List<ActorBodyPart> bodyParts;
-	public Color mainColor;
+	public Color mainColor = Color.white;
 
+	float defaultRegrow = 0.1f;
 	public BasicTimer superTimer = new BasicTimer(0f);
-	public BasicTimer regrowTimer = new BasicTimer(2f);
+	public BasicTimer regrowTimer = new BasicTimer(0.1f);
 
 	BodyPartType weaponType = BodyPartType.ArmLeftLower;
 	ActorBodyPart weapon = null;
-	BodyPartType throwerType = BodyPartType.ArmRightHand;
 	ActorBodyPart thrower = null;
 
-	float maxForce = 1200f;
+	float maxForce = 1800f;
 	public Vector3 currentDirection = Vector3.zero;
 
 	public GameObject skeleton;
@@ -60,17 +60,21 @@ public class ActorBody : MonoBehaviour
 		if( regrowList.Count > 0 && regrowTimer.Tick(deltaTime) )
 		{
 			Regrow();
-			regrowTimer.Duration = 2f*(IsSuper() ? 4f : 1f);
+			regrowTimer.Duration = defaultRegrow/(IsSuper() ? 4f : 1f);
 			regrowTimer.Reset();
 		}
-		currentDirection = 0.7f*this.transform.forward+0.5f*this.transform.up;
-		currentDirection.Normalize();
+		currentDirection = thisActor.ThrowVector();
+
+
+		if(Input.GetKey(KeyCode.P))
+		{
+			Test();
+		}
 	}
 
 	public bool CanThrowStart()
 	{
 		GetWeapon();
-		GetThrower();
 		bool result = thrower != null && thrower.CanThrowStart() && weapon != null && weapon.CanWeaponStart();
 		return result;
 	}
@@ -96,8 +100,6 @@ public class ActorBody : MonoBehaviour
 	
 	public void AlignToThrower()
 	{
-		GetWeapon();
-		GetThrower();
 		weapon.handParent = thrower.transform;
 		
 		thrower.machine.SetState(PartState.GRABBING);
@@ -160,7 +162,7 @@ public class ActorBody : MonoBehaviour
 	}
 	public void Cycle()
 	{
-		for(int i=0; i<10 && weapon == null; ++i)
+		for(int i=0; i<10; ++i)
 		{
 			switch(weaponType)
 			{
@@ -176,6 +178,10 @@ public class ActorBody : MonoBehaviour
 			}
 			ActorBodyPart nextWeapon = bodyParts.Find(x=>x.bodyPartType == weaponType && x.CanWeaponSelect());
 			SelectWeapon(nextWeapon);
+			if( weapon != null )
+			{
+				break;
+			}
 		}
 		
 	}
@@ -183,38 +189,29 @@ public class ActorBody : MonoBehaviour
 	public void GetThrower()
 	{
 		thrower = null;
-		throwerType = BodyPartType.None;
 		if( weaponType != BodyPartType.None )
 		{
 			bool weaponRight = IsRightArm(weaponType);
 			bool weaponLeft = IsLeftArm(weaponType);
 			if(weaponRight)
 			{
-				throwerType = BodyPartType.ArmLeftHand;
-				thrower = bodyParts.Find(x=>x.bodyPartType == throwerType && x.CanThrowStart());
+				thrower = bodyParts.Find(x=>x.bodyPartType == BodyPartType.ArmLeftHand && x.CanThrowStart());
 			}
 			else if(weaponLeft)
 			{
-				throwerType = BodyPartType.ArmRightHand;	
-				thrower = bodyParts.Find(x=>x.bodyPartType == throwerType && x.CanThrowStart());
+				thrower = bodyParts.Find(x=>x.bodyPartType == BodyPartType.ArmRightHand && x.CanThrowStart());
 			}
 			else
 			{
 				if( thrower == null )
 				{
-					throwerType = BodyPartType.ArmRightHand;
-					thrower = bodyParts.Find(x=>x.bodyPartType == throwerType && x.CanThrowStart());
+					thrower = bodyParts.Find(x=>x.bodyPartType == BodyPartType.ArmRightHand && x.CanThrowStart());
 				}
 				if( thrower == null )
 				{
-					throwerType = BodyPartType.ArmLeftHand;
-					thrower = bodyParts.Find(x=>x.bodyPartType == throwerType && x.CanThrowStart());
+					thrower = bodyParts.Find(x=>x.bodyPartType == BodyPartType.ArmLeftHand && x.CanThrowStart());
 				}
 			}
-		}
-		if( thrower == null )
-		{
-			throwerType = BodyPartType.None;
 		}
 	}
 	
@@ -322,5 +319,11 @@ public class ActorBody : MonoBehaviour
         {
             return 0.05f;
         }
+	}
+
+	public void Test()
+	{
+		ActorBodyPart legLowerLeft = bodyParts.Find(x=>x.bodyPartType == BodyPartType.LegLeftLower);
+		legLowerLeft.Glue(GlueState.SKELETON);
 	}
 }

@@ -87,12 +87,15 @@ public class ActorBodyPart : MonoBehaviour
 	public int depth = -1;
 
 	public bool stateLock = false;
-	private GlueState glueState;
+	private GlueState glueState = GlueState.HOME;
 	public PartState debugState;
 
 	public float growSpeed = 1f;
+	float defaultGrowTime = 0.1f;
 
 	private Vector3 nextForce = Vector3.zero;
+
+	Color selectedColor = new Color(0.5f, 1f, 0.8f, 1f);
 
 	void Awake()
 	{
@@ -151,7 +154,7 @@ public class ActorBodyPart : MonoBehaviour
 	}
 	public bool CanWeaponSelect()
 	{
-		return machine.IsState(PartState.ATTACHED);
+		return machine.IsState(PartState.SELECTED) || machine.IsState(PartState.ATTACHED);
 	}
 	public bool CanWeaponDeselect()
 	{
@@ -192,6 +195,7 @@ public class ActorBodyPart : MonoBehaviour
 		{
 			Expire();
 		}
+		
 	}
 
 	public void Expire()
@@ -206,10 +210,9 @@ public class ActorBodyPart : MonoBehaviour
 		stateLock = val;
 		if( !val )
 		{
-			machine.RetryFailedState();
-			//if( unlockResult != null )
+			if( machine.failedState != null)
 			{
-				//PartState st = (PartState)machine.GetActiveState();
+				machine.RetryFailedState();
 			}
 		}
 	}
@@ -245,9 +248,15 @@ public class ActorBodyPart : MonoBehaviour
 
 	void OnAlign()
 	{
-		Glue(GlueState.SKELETON);
-		SetStateChildren(PartState.GLUED);
+		StartCoroutine(AlignRoutine());
+	}
 
+	IEnumerator AlignRoutine()
+	{
+		Glue(GlueState.SKELETON);
+		yield return null;
+		SetStateChildren(PartState.GLUED);
+		yield return null;
 		StateLock(true);
 		thisTransform.DOMove(handParent.position, 1).OnComplete(SetStateHeld);
 	}
@@ -278,6 +287,7 @@ public class ActorBodyPart : MonoBehaviour
 		
 	}
 
+
 	void SetParent(Transform nextParent)
 	{
 		thisTransform.SetParent(nextParent, true);
@@ -286,7 +296,7 @@ public class ActorBodyPart : MonoBehaviour
 	void OnGrow()
 	{
 		StateLock(true);
-		thisTransform.DOScale(originalScale, 1f/growSpeed).OnComplete(Reregister);	
+		thisTransform.DOScale(originalScale, defaultGrowTime/growSpeed).OnComplete(Reregister);	
 	}
 
 	public void Glue(GlueState nextGlueState)
@@ -296,10 +306,13 @@ public class ActorBodyPart : MonoBehaviour
 			return;
 		}
 		glueState = nextGlueState;
+
 		switch(glueState)
 		{
 			case GlueState.HOME: SetParent(bodyParent); break;
-			case GlueState.SKELETON: SetParent(thisBody.skeleton.transform); break;
+			case GlueState.SKELETON: 
+				SetParent(thisBody.skeleton.transform); 
+				break;
 			case GlueState.HAND: SetParent(handParent); break;
 			case GlueState.LIMB: SetParent(limbParent); break;
 			case GlueState.FREE: 
@@ -390,9 +403,9 @@ public class ActorBodyPart : MonoBehaviour
 		Color color = Color.white;
 		switch(machine.GetActiveState())
 		{
-			case 0: color = Color.black; break;
+			case 0: color = Color.white; break;
 			case 1: color = thisBody.mainColor; break;
-			case 2: color = Color.green; break;
+			case 2: color = selectedColor; break;
 			case 3: color = Color.red; break;
 			case 4: color = Color.magenta; break;
 			case 5: color = Color.cyan; break;
@@ -400,14 +413,14 @@ public class ActorBodyPart : MonoBehaviour
 			case 7: color = Color.white; break;
 		}
 		debugState = (PartState)machine.GetActiveState();
-		//PartState lastState = (PartState)prevIdx;
-		//Debug.Log("Change"+lastState+" "+debugState);
+		PartState lastState = (PartState)prevIdx;
 		SetColor(color);		
 	}
 
 	public void SetColor(Color color)
 	{
-		thisRenderer.material.color = color;
+		thisRenderer.material.SetColor("_Color",color);
+		//thisRenderer.material.SetColor("_EmissionColor",color);
 	}
 
 	public void OnCollisionEnter(Collision collision)
@@ -432,7 +445,12 @@ public class ActorBodyPart : MonoBehaviour
 			{
 				Expire();
 			}
+			else
+			{
+
+			}
 		}
+		
 	}
 
 	public void HitBy(ActorBodyPart other)
