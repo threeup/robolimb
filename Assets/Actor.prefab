@@ -4968,6 +4968,21 @@ MonoBehaviour:
   spacing: 1
   canDraw: 1
   aimTarget: {fileID: 0}
+  aimCurve:
+    serializedVersion: 2
+    m_Curve:
+    - time: 0
+      value: 0
+      inSlope: 2
+      outSlope: 2
+      tangentMode: 0
+    - time: 1
+      value: 0
+      inSlope: -1.84697223
+      outSlope: -1.84697223
+      tangentMode: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
 --- !u!114 &11454470
 MonoBehaviour:
   m_ObjectHideFlags: 1

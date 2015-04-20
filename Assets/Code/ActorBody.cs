@@ -12,12 +12,13 @@ public class ActorBody : MonoBehaviour
 	public List<ActorBodyPart> bodyParts;
 	public Color mainColor = Color.white;
 
-	float defaultRegrow = 0.1f;
+	float defaultRegrow = 0.6f;
 	public BasicTimer superTimer = new BasicTimer(0f);
 	public BasicTimer regrowTimer = new BasicTimer(0.1f);
 
 	BodyPartType weaponType = BodyPartType.ArmLeftLower;
 	ActorBodyPart weapon = null;
+	ActorBodyPart projectile = null;
 	ActorBodyPart thrower = null;
 
 	float maxForce = 1800f;
@@ -28,6 +29,7 @@ public class ActorBody : MonoBehaviour
 	public bool canWalkNormal = true;
 	public bool canWalkHop = false;
 	public bool canWalkKneel = false;
+	public bool hasHead = true;
 
 	List<ActorBodyPart> regrowList = new List<ActorBodyPart>();
 
@@ -57,7 +59,7 @@ public class ActorBody : MonoBehaviour
 	{
 		float deltaTime = Time.deltaTime;
 		superTimer.Tick(deltaTime);
-		if( regrowList.Count > 0 && regrowTimer.Tick(deltaTime) )
+		if( hasHead && regrowList.Count > 0 && regrowTimer.Tick(deltaTime) )
 		{
 			Regrow();
 			regrowTimer.Duration = defaultRegrow/(IsSuper() ? 4f : 1f);
@@ -114,12 +116,24 @@ public class ActorBody : MonoBehaviour
 
 	public void Launch(float amount)
 	{
+		projectile = weapon;
+		StartCoroutine(LaunchRoutine(amount));
+
+	}
+	IEnumerator LaunchRoutine(float amount)
+	{
+		while(projectile.stateLock)
+		{
+			yield return new WaitForSeconds(0.1f);
+		}
 		amount = 0.33f+0.67f*amount;
 		thrower.machine.SetState(PartState.ATTACHED);
-		weapon.Launch(amount*maxForce, currentDirection);
-		Deregister(weapon);
-		weapon = null;
+		SelectWeapon(null);
+		yield return null;
+		projectile.Launch(amount*maxForce, currentDirection);
+		Deregister(projectile);
 		thrower = null;
+		yield return null;
 		EvaluateSelf();
 	}
 
@@ -127,28 +141,27 @@ public class ActorBody : MonoBehaviour
 	{
 		if( weapon != null )
 		{
-			if( weapon.CanWeaponDeselect() )
+			if( !weapon.CanWeaponDeselect() )
 			{
-				weapon.Select(false);
-			}
-			else
-			{
-				Debug.Log("Failed to deselect"+weapon);
+				Debug.Log("Failed to deselect"+weapon+" "+weapon.debugState);
 				return;
 			}
+			weapon.Select(false);
 			weapon = null;
 		}
-		weapon = bp;
-		if( weapon != null )
+		if( bp == null )
 		{
+			return;
+		}
+		if( bp.CanWeaponSelect() )
+		{
+			weapon = bp;
 			GetThrower();
 			if( thrower == null )
 			{
 				weapon = null;
+				return;
 			}
-		}
-		if( weapon != null)
-		{
 			weapon.Select(true);
 		}
 	}
@@ -280,7 +293,9 @@ public class ActorBody : MonoBehaviour
 		ActorBodyPart legLowerRight = bodyParts.Find(x=>x.bodyPartType == BodyPartType.LegRightLower && x.CanWalk()); 
 		ActorBodyPart legUpperLeft = bodyParts.Find(x=>x.bodyPartType == BodyPartType.LegLeftUpper && x.CanWalk()); 
 		ActorBodyPart legUpperRight = bodyParts.Find(x=>x.bodyPartType == BodyPartType.LegRightUpper && x.CanWalk()); 
+		ActorBodyPart head = bodyParts.Find(x=>x.bodyPartType == BodyPartType.Head && x.CanWalk()); 
 		
+		hasHead = head != null;
 		canWalkNormal = legLowerLeft != null && legLowerRight != null;
 		canWalkHop = legLowerLeft != null || legLowerRight != null;
 		canWalkKneel = legUpperLeft != null && legUpperRight != null && legLowerLeft == null && legLowerRight == null;

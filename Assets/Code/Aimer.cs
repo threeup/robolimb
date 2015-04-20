@@ -14,6 +14,8 @@ public class Aimer : MonoBehaviour
 
 	public GameObject aimTarget;
 
+	public AnimationCurve aimCurve;
+
 	void Awake()
 	{
 		SetEnabled(false);
@@ -34,7 +36,7 @@ public class Aimer : MonoBehaviour
 	void TargetForwardest()
 	{
 		List<Actor> livingActors = Game.Instance.livingActors;
-        float bestDot = 0f;
+        float bestDot = 0.7f;
         Actor bestActor = null;
         foreach(Actor otherActor in livingActors)
         {
@@ -77,8 +79,8 @@ public class Aimer : MonoBehaviour
 
 		for(int i=0; i<aimChildren.Count; ++i)
 		{
-			Vector3 pos = Vector3.forward*i*spacing;
-			pos.y = i*val;
+			Vector3 pos = Vector3.forward*i*spacing*(0.5f+2.5f*val);
+			pos.y = val*10f*aimCurve.Evaluate((float)i/(float)aimChildren.Count);
 			aimChildren[i].transform.localPosition = pos;
 		}
 	}

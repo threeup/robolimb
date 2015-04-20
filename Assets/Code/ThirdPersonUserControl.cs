@@ -64,7 +64,7 @@ namespace UnityStandardAssets.Characters.ThirdPerson
                 doJump = CrossPlatformInputManager.GetButtonDown("Jump");
             }
             bool shouldThrow = CrossPlatformInputManager.GetButton("Fire1");
-            bool shouldCycle = CrossPlatformInputManager.GetButton("Fire2");
+            bool shouldCycle = CrossPlatformInputManager.GetButton("Fire2") || Input.GetKey(KeyCode.LeftControl);
             if( doThrow != shouldThrow)
             {
                 doThrow = shouldThrow;

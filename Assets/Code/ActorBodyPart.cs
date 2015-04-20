@@ -158,7 +158,7 @@ public class ActorBodyPart : MonoBehaviour
 	}
 	public bool CanWeaponDeselect()
 	{
-		return machine.IsState(PartState.SELECTED) || machine.IsState(PartState.LAUNCH);
+		return machine.IsState(PartState.SELECTED) || machine.IsState(PartState.HELD);
 	}
 
 	public bool CanWalk()
@@ -244,6 +244,11 @@ public class ActorBodyPart : MonoBehaviour
 	void OnAttach()
 	{
 		thisBody.Register(this);
+
+		Glue(GlueState.HOME);
+		thisTransform.localPosition = originalPos;
+		thisTransform.localRotation = originalRot;
+		
 	}
 
 	void OnAlign()
@@ -270,6 +275,7 @@ public class ActorBodyPart : MonoBehaviour
 	void OnDormant()
 	{
 		GameObject debris = Instantiate(this.gameObject, thisTransform.position, thisTransform.rotation) as GameObject;
+		debris.layer = LayerMask.NameToLayer("Projectile");
 		debris.transform.localScale = originalScale;
 		ActorBodyPart debrisPart = debris.GetComponent<ActorBodyPart>();
 		//debrisPart.thisRenderer.material = new Material(thisRenderer.material);
@@ -278,12 +284,16 @@ public class ActorBodyPart : MonoBehaviour
 		//debrisPart.SetParent(thisTransform.parent);
 		Destroy(debrisPart);
 
-		Glue(GlueState.HOME);
-		thisTransform.localPosition = originalPos;
-		thisTransform.localRotation = originalRot;
 		thisTransform.localScale = 0.0001f*Vector3.one;
-		
-		thisBody.Dormant(this);
+		if( thisBody != null )
+		{
+			thisBody.Dormant(this);
+		}
+		else
+		{
+			Debug.Log("Missing body"+this.gameObject);
+			Destroy (this.gameObject);
+		}
 		
 	}
 
@@ -425,6 +435,10 @@ public class ActorBodyPart : MonoBehaviour
 
 	public void OnCollisionEnter(Collision collision)
 	{
+		if( collision.relativeVelocity.sqrMagnitude < 3f*3f)
+		{
+			return;
+		}
 		ActorBodyPart bodyPart = collision.collider.GetComponent<ActorBodyPart>();
 		if( bodyPart != null )
 		{
