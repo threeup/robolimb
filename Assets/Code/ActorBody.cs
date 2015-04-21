@@ -21,7 +21,7 @@ public class ActorBody : MonoBehaviour
 	ActorBodyPart projectile = null;
 	ActorBodyPart thrower = null;
 
-	float maxForce = 1800f;
+	float maxForce = 1200f;
 	public Vector3 currentDirection = Vector3.zero;
 
 	public GameObject skeleton;
@@ -111,7 +111,10 @@ public class ActorBody : MonoBehaviour
 
 	public void Animate()
 	{
-		thrower.machine.SetState(PartState.ANIMATING);
+		if( thrower != null )
+		{
+			thrower.machine.SetState(PartState.ANIMATING);
+		}
 	}
 
 	public void Launch(float amount)
@@ -280,6 +283,7 @@ public class ActorBody : MonoBehaviour
 			{
 				bodyPart.Expire();
 			}
+			Game.Instance.livingActors.Remove(thisActor);
 		}
 		else
 		{

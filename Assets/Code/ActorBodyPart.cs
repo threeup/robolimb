@@ -44,6 +44,13 @@ public enum PartState
 	GROWING,
 }
 
+public enum PhysicsState
+{
+	NORMAL,
+	FLYINGOFF,
+	FLYINGON,
+}
+
 // upper arm
 // selected, aligning, held, launch, dormant
 // lower arm
@@ -89,6 +96,7 @@ public class ActorBodyPart : MonoBehaviour
 
 	public bool stateLock = false;
 	private GlueState glueState = GlueState.HOME;
+	private PhysicsState physicsState = PhysicsState.NORMAL;
 	public PartState debugState;
 
 	public float growSpeed = 1f;
@@ -159,7 +167,8 @@ public class ActorBodyPart : MonoBehaviour
 	}
 	public bool CanWeaponDeselect()
 	{
-		return machine.IsState(PartState.SELECTED) || machine.IsState(PartState.HELD);
+		return machine.IsState(PartState.SELECTED) || machine.IsState(PartState.HELD) || 
+				machine.IsState(PartState.ATTACHED) || machine.IsState(PartState.LAUNCH);
 	}
 
 	public bool CanWalk()
@@ -190,11 +199,17 @@ public class ActorBodyPart : MonoBehaviour
 		float deltaTime = Time.deltaTime;
 		if( waitingForProjectile )
 		{
+			
 			Vector3 diff = this.transform.position - thisBody.skeleton.transform.position;
 			if( Mathf.Abs(diff.x) + Mathf.Abs(diff.z) > 0.5f )
 			{
-				SetLayerRecursive(LayerMask.NameToLayer("Projectile"));
+				if( physicsState == PhysicsState.FLYINGOFF )
+				{
+					PhysicsChange(PhysicsState.FLYINGON);
+				}
+				waitingForProjectile = false;
 			}
+			
 		}
 		
 		if( expireTimer.Tick(deltaTime) )
@@ -238,13 +253,14 @@ public class ActorBodyPart : MonoBehaviour
 			childPart.SetStateRecursive(nextState);
 		}
 	}
-	public void SetLayerRecursive(LayerMask layer)
+	public void SetLayerRecursive(LayerMask layer, bool colliderIsTrigger)
 	{
 		this.gameObject.layer = layer;
+		thisCollider.isTrigger = colliderIsTrigger; 
 		SetColor(thisBody.mainColor);
 		if( childPart != null )
 		{
-			childPart.SetLayerRecursive(layer);
+			childPart.SetLayerRecursive(layer, colliderIsTrigger);
 		}
 	}
 
@@ -319,6 +335,30 @@ public class ActorBodyPart : MonoBehaviour
 		thisTransform.DOScale(originalScale, defaultGrowTime/growSpeed).OnComplete(Reregister);	
 	}
 
+	public void PhysicsChange(PhysicsState nextPhysicsState)
+	{
+		if( physicsState == nextPhysicsState )
+		{
+			return;
+		}
+		physicsState = nextPhysicsState;	
+		switch(physicsState)
+		{
+			case PhysicsState.NORMAL: 
+				this.gameObject.layer = LayerMask.NameToLayer("Limb");
+				thisCollider.isTrigger = false;
+				break;
+			case PhysicsState.FLYINGON:
+				this.gameObject.layer = LayerMask.NameToLayer("Projectile");
+				thisCollider.isTrigger = false;
+				break;
+			case PhysicsState.FLYINGOFF:
+				this.gameObject.layer = LayerMask.NameToLayer("Projectile");
+				thisCollider.isTrigger = true;
+				break;
+		}
+	}
+
 	public void Glue(GlueState nextGlueState)
 	{
 		if( glueState == nextGlueState )
@@ -342,12 +382,13 @@ public class ActorBodyPart : MonoBehaviour
 		if(glueState == GlueState.FREE)
 		{
 			thisRigidbody.isKinematic = false;
+			PhysicsChange(PhysicsState.FLYINGOFF);
 			waitingForProjectile = true;
 		}
 		else
 		{
 			thisRigidbody.isKinematic = true;
-			this.gameObject.layer = LayerMask.NameToLayer("Limb");
+			PhysicsChange(PhysicsState.NORMAL);
 		}
 	}
 
@@ -433,7 +474,7 @@ public class ActorBodyPart : MonoBehaviour
 			case 7: color = Color.white; break;
 		}
 		debugState = (PartState)machine.GetActiveState();
-		PartState lastState = (PartState)prevIdx;
+		//PartState lastState = (PartState)prevIdx;
 		SetColor(color);		
 	}
 

@@ -11,7 +11,8 @@ public class Actor : MonoBehaviour
 		NONE,
 		ALIGN,
 		CHARGE,
-		FLY
+		COOLDOWN,
+
 	}
 	public ActorTeam team = ActorTeam.NONE;
 	public ThrowPhase throwPhase = ThrowPhase.NONE;
@@ -98,7 +99,7 @@ public class Actor : MonoBehaviour
 				}
 				break;
 			case ThrowPhase.ALIGN: 
-				throwTimer = new BasicTimer(6f, false);
+				throwTimer = new BasicTimer(3f, false);
 				body.Animate(); 
 				throwPhase = ThrowPhase.CHARGE;
 				break;
@@ -106,9 +107,13 @@ public class Actor : MonoBehaviour
 				if( body.CanThrowFinish() )
 				{
 					body.Launch(1f-throwTimer.Percent);
-					throwTimer.Pause(true);
-					throwPhase = ThrowPhase.NONE;
+					throwTimer = new BasicTimer(0.5f, false);
+					throwPhase = ThrowPhase.COOLDOWN;
 				}
+				break;
+			case ThrowPhase.COOLDOWN:
+				throwTimer.Pause(true);
+				throwPhase = ThrowPhase.NONE;
 				break;
 			default: 
 				break;
@@ -139,6 +144,9 @@ public class Actor : MonoBehaviour
 					AdvanceThrow();
 				}
 				break;
+			case ThrowPhase.COOLDOWN:
+				//nothing
+				break;
 		}
 	}
 
@@ -154,6 +162,10 @@ public class Actor : MonoBehaviour
 
 	public void AIThrow(bool val)
 	{
+		if( throwPhase == ThrowPhase.CHARGE && UnityEngine.Random.Range(0,10) == 1 )
+		{
+			val = false;
+		}
 		aiThrow = val;
 		Throwing(val, false);
 	}

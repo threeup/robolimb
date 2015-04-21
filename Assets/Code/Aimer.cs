@@ -79,8 +79,8 @@ public class Aimer : MonoBehaviour
 
 		for(int i=0; i<aimChildren.Count; ++i)
 		{
-			Vector3 pos = Vector3.forward*i*spacing*(0.5f+2.5f*val);
-			pos.y = val*10f*aimCurve.Evaluate((float)i/(float)aimChildren.Count);
+			Vector3 pos = Vector3.forward*i*spacing*(0.5f+1.5f*val);
+			pos.y = val*6f*aimCurve.Evaluate((float)i/(float)aimChildren.Count);
 			aimChildren[i].transform.localPosition = pos;
 		}
 	}

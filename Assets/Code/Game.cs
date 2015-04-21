@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.UI;
 using System.Collections;
 using System.Collections.Generic;
 using BasicCommon;
@@ -28,8 +29,14 @@ public class Game : MonoBehaviour
 	public List<Item> livingItems = new List<Item>();
 	public BasicMachine<GameState> machine;
 	public AutoCam autoCam;
+	public int blueCount;
+	public Text blueText;
+	public int redCount;
+	public Text redText;
+	private int recountTick = 0;
 
-	public GameObject canvas;
+	public GameObject introCanvas;
+	public GameObject actionCanvas;
 
 	void Awake()
 	{
@@ -41,6 +48,10 @@ public class Game : MonoBehaviour
 		machine[(int)GameState.SPAWNING].OnEnter = OnSpawn;
 		machine[(int)GameState.SPAWNING].CanEnter = CanSpawn;
 		machine[(int)GameState.ACTION].CanEnter = CanAction;
+		machine[(int)GameState.ACTION].OnEnter = OnAction;
+		machine[(int)GameState.ACTION].OnExit = OnActionExit;
+
+		actionCanvas.SetActive(false);
 	}
 
 
@@ -50,6 +61,24 @@ public class Game : MonoBehaviour
 		if( machine.failedState != null)
 		{
 			machine.RetryFailedState();
+		}
+
+		recountTick--;
+		if( recountTick < 0 )
+		{
+			recountTick = 10;
+			blueCount = livingActors.FindAll(x => x.team == ActorTeam.BLUE).Count;
+			blueText.text = "BLUE: "+blueCount.ToString();
+			redCount = livingActors.FindAll(x => x.team == ActorTeam.RED).Count;
+			redText.text = "RED: "+redCount.ToString();
+			if( redCount == 0 || blueCount == 0 )
+			{
+				GameState currentState = (GameState)machine.GetActiveState();
+				if( currentState == GameState.ACTION)
+				{
+					machine.SetState(GameState.INTRO);
+				}
+			}
 		}
 	}
 
@@ -155,7 +184,7 @@ public class Game : MonoBehaviour
 
 	public void OnIntro()
 	{
-		canvas.SetActive(true);
+		introCanvas.SetActive(true);
 		foreach(Actor actor in livingActors)
 		{
 			Destroy(actor.gameObject);
@@ -170,7 +199,7 @@ public class Game : MonoBehaviour
 
 	public void OnIntroExit()
 	{
-		canvas.SetActive(false);
+		introCanvas.SetActive(false);
 	}
 
 	public void OnSpawn()
@@ -178,7 +207,7 @@ public class Game : MonoBehaviour
 		int alivePC = 0;
 		int aliveAI = 0;
 		int desiredPC = 1;
-		int desiredAI = 5;
+		int desiredAI = 7;
 		foreach(Spawner spawner in spawners)
 		{
 			if( spawner.selfSpawn )
@@ -208,4 +237,14 @@ public class Game : MonoBehaviour
 		}
 		machine.SetState(GameState.ACTION);
 	}
+
+	public void OnAction()
+	{
+		actionCanvas.SetActive(true);
+	} 
+
+	public void OnActionExit()
+	{
+		actionCanvas.SetActive(false);
+	} 
 }
